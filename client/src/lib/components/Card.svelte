@@ -1,0 +1,39 @@
+<script>
+	let { suit, value, hidden = false, onclick } = $props();
+
+	let suits = {
+		hearts: { symbol: "♥", color: "red" },
+		diamonds: { symbol: "♦", color: "red" },
+		clubs: { symbol: "♣", color: "black" },
+		spades: { symbol: "♠", color: "black" },
+	};
+</script>
+
+<!-- svelte-ignore attribute_global_event_reference -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="inline-flex relative border border-black rounded p-2 h-56 w-42 cursor-pointer hover:shadow-lg"
+	{onclick}
+>
+	{#if hidden}
+		<div
+			class="absolute left-0 right-0 top-0 bottom-0 bg-gray-200 rounded"
+		></div>
+	{:else}
+		<div class="absolute flex flex-col items-center top-4 left-4">
+			<span class="text-2xl">{value}</span>
+			<span class="text-3xl" style="color: {suits[suit].color}"
+				>{suits[suit].symbol}</span
+			>
+		</div>
+		<div
+			class="absolute flex flex-col items-center bottom-4 right-4 rotate-180"
+		>
+			<span class="text-2xl">{value}</span>
+			<span class="text-3xl" style="color: {suits[suit].color}"
+				>{suits[suit].symbol}</span
+			>
+		</div>
+	{/if}
+</div>
