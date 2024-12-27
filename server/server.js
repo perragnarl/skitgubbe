@@ -1,26 +1,13 @@
-const io = require("socket.io")(3000, {
+import { deckTemplate } from "./deck.js";
+import { Server } from "socket.io";
+
+const io = new Server(3000, {
   cors: {
     origin: ["http://localhost:5173"],
   },
 });
 
 const maxPlayers = 4;
-const suits = ["hearts", "diamonds", "clubs", "spades"];
-const values = [
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "J",
-  "Q",
-  "K",
-  "A",
-];
 const colors = {
   1: "red",
   2: "blue",
@@ -29,6 +16,11 @@ const colors = {
   5: "purple",
 };
 let players = [];
+let gamePhase = 0;
+let deck = [];
+let isStarted = false;
+let battleRound = false;
+let battleStack = [];
 
 io.on("connection", (socket) => {
   console.log("New connection");
@@ -46,13 +38,17 @@ io.on("connection", (socket) => {
     name: `Spelare ${players.length + 1}`,
     color: colors[players.length + 1],
     hand: [],
+    table: [],
+    vault: [],
     current: false,
+    inBattle: false,
+    battleHand: [],
   };
 
   // Add the player to the list of players
   players.push(player);
 
-  socket.emit("connection", player, players);
+  socket.emit("connection", player, players, isStarted);
 
   // Notify other players that a new player has joined
   socket.broadcast.emit("new-player", player);
@@ -72,6 +68,12 @@ io.on("connection", (socket) => {
     players = [];
     Object.values(io.of("/").sockets).forEach((s) => s.disconnect(true));
     updatePlayers();
+  });
+
+  // Reset the game
+  socket.on("reset-game", () => {
+    resetGame();
+    updatePlayer();
   });
 
   // Handle chat messages
@@ -96,6 +98,7 @@ io.on("connection", (socket) => {
 
     updatePlayer();
 
+    // if (players.length > 2 && players.every((p) => p.ready)) {
     if (players.every((p) => p.ready)) {
       console.log("All players are ready");
       io.emit("all-ready");
@@ -105,36 +108,156 @@ io.on("connection", (socket) => {
 
   // Handle card play
   socket.on("play-card", (card) => {
-    console.log(`${player.id} played ${card.value} of ${card.suit}`);
+    if (gamePhase === 1) {
+      console.log(`${player.id} played ${card.value} of ${card.suit}`);
 
-    // Remove the card from the player's hand
-    player.hand = player.hand.filter(
-      (c) => c.suit !== card.suit || c.value !== card.value
-    );
+      // Remove the card from the player's hand
+      player.hand = player.hand.filter(
+        (c) => c.value !== card.value || c.suit !== card.suit
+      );
 
-    // Notify all players that the card has been played
-    io.emit("card-played", player, card);
+      // Add the card to the player's table
+      player.table.push(card);
 
+      // TODO: Logic to see if there are enough cards left in the deck before starting phase 2
+      console.log("Cards left: ", deck.length);
+
+      if (deck.length === 0) {
+        gamePhase = 2;
+      } else {
+        // Give a new card to the player
+        player.hand.push(deck.shift());
+
+        // Remove current player status
+        player.current = false;
+      }
+
+      // Check if the player is last in the round
+      if (players.every((p) => p.table.length === 1)) {
+        console.log("Round is over");
+
+        // Find the highest card on the table of all players
+        let highest = 0;
+        players.forEach((p) => {
+          if (p.table[0].value > highest) {
+            highest = p.table[0].value;
+          }
+        });
+
+        // Console log all the players cards on their table
+        players.forEach((p) => {
+          console.log(`${p.id} table: `, p.table);
+        });
+
+        // Find all players who played the highest card
+        let playersWithHighestCard = players.filter(
+          (p) => p.table[0].value === highest
+        );
+
+        if (playersWithHighestCard.length > 1) {
+          // Set the battle round flag
+          battleRound = true;
+          console.log("Starting battle round");
+
+          // Move all cards to the battle stack
+          players.forEach((p) => {
+            battleStack.push(...p.table);
+            p.table = [];
+          });
+
+          // Mark all players who played the highest card as in battle
+
+          // TODO: Fix this error
+          // file:///Users/perragnarl/Development/Laboratory/skitgubbe-ez/server/server.js:170
+          //   if (p.table[0].value === highest.value) {
+          //                  ^
+
+          // TypeError: Cannot read properties of undefined (reading 'value')
+          players.forEach((p) => {
+            if (p.table[0].value === highest.value) {
+              p.battle = true;
+            }
+          });
+
+          // Set the current player to the player who first played the highest card
+          let currentPlayer = players.find(
+            (p) => p.table[0].value === highest.value
+          );
+          currentPlayer.current = true;
+        } else {
+          // Find the player with the highest card
+          let winner = players.find((p) => p.table[0].value === highest);
+
+          // Move all cards from the players tables to the winner's vault
+          players.forEach((p) => {
+            winner.vault.push(...p.table);
+            p.table = [];
+          });
+
+          // Reset battle round
+          if (battleRound) {
+            // Move all cards from the battle stack to the winner's vault
+            winner.vault.push(...battleStack);
+            // Clear the battle stack
+            battleStack = [];
+            // Reset the battle round flag
+            battleRound = false;
+            // Mark all players as not in battle
+            players.forEach((p) => (p.inBattle = false));
+          }
+
+          // Set the winner as the current player
+          players.forEach((p) => (p.current = p.id === winner.id));
+        }
+      } else {
+        // Find the next player (next in array) and set them as current
+        let index = players.indexOf(player);
+        player.current = false;
+        if (index === players.length - 1) {
+          players[0].current = true;
+        } else {
+          players[index + 1].current = true;
+        }
+      }
+    } else if (gamePhase === 2) {
+      // Something
+    }
+
+    // Update the player
     updatePlayer();
   });
 
+  function resetGame() {
+    players.forEach((player) => {
+      player.hand = [];
+      player.table = [];
+      player.vault = [];
+      player.current = false;
+      player.ready = false;
+    });
+    gamePhase = 0;
+    deck = [];
+    isStarted = false;
+  }
+
   function startGame() {
+    if (isStarted) {
+      return;
+    }
+
+    isStarted = true;
+
     // Handle game start
     console.log("Game is starting");
 
     // Notify all players that the game has started
     io.emit("start-game");
 
+    // Enter the first phase of the game
+    gamePhase = 1;
+
     // Create a deck of cards
-    let deck = [];
-    suits.forEach((suit) => {
-      values.forEach((value) => {
-        deck.push({
-          suit: suit,
-          value: value,
-        });
-      });
-    });
+    deck = [...deckTemplate];
 
     // Shuffle the deck
     deck.sort(() => Math.random() - 0.5);

@@ -13,22 +13,26 @@
 	import Hand from "./lib/components/Hand.svelte";
 
 	let started = $state(false);
+	let onGoing = $state(false);
 	let player = $state({
 		id: "",
 		name: "",
 		color: "",
 		ready: false,
 		hand: [],
+		table: [],
 		current: false,
 	});
 	let playerList = $state([]);
 
-	$socket.on("connection", (playerInfo) => {
+	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
+		playerList = activePlayerList
+		onGoing = isStarted;
 	});
 
 	$socket.on("update-players", (newList) => {
-		playerList = [...newList];
+		playerList = newList;
 	});
 
 	$socket.on("update-player", (playerInfo) => {
@@ -55,9 +59,13 @@
 		$socket.emit("disconnect-all");
 	}
 
+	function resetGame() {
+		$socket.emit("reset-game");
+	}
+
 	function playCard(card, current) {
-		if (!current) return;	
-		
+		if (!current) return;
+
 		$socket.emit("play-card", card);
 	}
 </script>
@@ -70,9 +78,24 @@
 			{#each playerList as p}
 				{#if p.id !== player.id}
 					<Hand current={p.current}>
-						{#each p.hand as { suit, value }}
-							<Card {suit} {value} hidden onclick={null} />
-						{/each}
+						Motståndare bord
+						<div>
+							{#each p.table as { suit, label }}
+								<Card {suit} {label} />
+							{/each}
+						</div>
+						Motståndare hand
+						<div>
+							{#each p.hand as { suit, label }}
+								<Card {suit} {label} hidden onclick={null} />
+							{/each}
+						</div>
+						Motståndare valv
+						<div>
+							{#each p.vault as { suit, label }}
+								<Card {suit} {label} hidden />
+							{/each}
+						</div>
 					</Hand>
 				{/if}
 			{/each}
@@ -80,19 +103,34 @@
 			{#each playerList as p}
 				{#if p.id === player.id}
 					<Hand current={p.current}>
-						{#each p.hand as card}
-							<Card
-								suit={card.suit}
-								value={card.value}
-								onclick={() => playCard(card, p.current)}
-							/>
-						{/each}
+						Ditt bord
+						<div>
+							{#each p.table as { suit, label }}
+								<Card {suit} {label} />
+							{/each}
+						</div>
+						Din hand
+						<div>
+							{#each p.hand as card}
+								<Card
+									suit={card.suit}
+									label={card.label}
+									onclick={() => playCard(card, p.current)}
+								/>
+							{/each}
+						</div>
+						Ditt valv
+						<div>
+							{#each p.vault as { suit, label }}
+								<Card {suit} {label} />
+							{/each}
+						</div>
 					</Hand>
 				{/if}
 			{/each}
 		</div>
 	{:else}
-		<Lobby bind:player readychange={readyChange} />
+		<Lobby bind:player readychange={readyChange} {onGoing} />
 	{/if}
 
 	<div
@@ -101,6 +139,11 @@
 		<Log />
 		<Chat />
 		<Player changename={changeName} bind:player {started} />
-		<PlayerList disconnectall={disconnectAll} bind:playerList {started} />
+		<PlayerList
+			resetgame={resetGame}
+			disconnectall={disconnectAll}
+			bind:playerList
+			{started}
+		/>
 	</div>
 </main>
