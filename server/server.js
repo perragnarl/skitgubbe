@@ -1,11 +1,45 @@
 import { deckTemplate } from "./deck.js";
 import { Server } from "socket.io";
+import http from "http";
+import path from "path";
+import { fileURLToPath } from "url";
+import express from "express";
 
-const io = new Server(3000, {
-  cors: {
-    origin: ["http://localhost:5173"],
-  },
-});
+const isDocker = process.env.IS_DOCKER === "true";
+
+let io;
+if (isDocker) {
+  const app = express();
+  const server = http.createServer(app);
+  io = new Server(server, {
+    cors: {
+      origin: ["http://localhost:1337"],
+    },
+    serveClient: false,
+    transports: ["websocket", "polling"],
+    allowEIO3: true,
+  });
+
+  // Serve static files from the public directory
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  app.use(express.static(path.join(__dirname, "public")));
+
+  // Start the server
+  const PORT = 1337;
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+} else {
+  io = new Server(3000, {
+    cors: {
+      origin: ["http://localhost:5173"],
+    },
+    serveClient: false,
+    transports: ["websocket", "polling"],
+    allowEIO3: true,
+  });
+}
 
 const maxPlayers = 4;
 const colors = {
@@ -158,6 +192,15 @@ io.on("connection", (socket) => {
           // Set the battle round flag
           battleRound = true;
           console.log("Starting battle round");
+          socket.emit("battle-round", playersWithHighestCard);
+
+          // Mark all players who played the highest card as in battle
+          playersWithHighestCard.forEach((p) => (p.inBattle = true));
+
+          // Set the current player to the player who first played the highest card
+          let currentPlayer = playersWithHighestCard.find(
+            (p) => p.id === player.id
+          );
 
           // Move all cards to the battle stack
           players.forEach((p) => {
@@ -165,24 +208,6 @@ io.on("connection", (socket) => {
             p.table = [];
           });
 
-          // Mark all players who played the highest card as in battle
-
-          // TODO: Fix this error
-          // file:///Users/perragnarl/Development/Laboratory/skitgubbe-ez/server/server.js:170
-          //   if (p.table[0].value === highest.value) {
-          //                  ^
-
-          // TypeError: Cannot read properties of undefined (reading 'value')
-          players.forEach((p) => {
-            if (p.table[0].value === highest.value) {
-              p.battle = true;
-            }
-          });
-
-          // Set the current player to the player who first played the highest card
-          let currentPlayer = players.find(
-            (p) => p.table[0].value === highest.value
-          );
           currentPlayer.current = true;
         } else {
           // Find the player with the highest card
@@ -193,6 +218,8 @@ io.on("connection", (socket) => {
             winner.vault.push(...p.table);
             p.table = [];
           });
+
+          socket.emit("round-winner", winner);
 
           // Reset battle round
           if (battleRound) {

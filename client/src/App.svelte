@@ -2,7 +2,7 @@
 	import { io } from "socket.io-client";
 	import { socket } from "./store.js";
 
-	$socket = io("http://localhost:3000");
+	$socket = io("http://localhost:1337");
 
 	import Chat from "./lib/components/Chat.svelte";
 	import Lobby from "./lib/components/Lobby.svelte";
