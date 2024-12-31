@@ -24,16 +24,18 @@
 			<p>{player.ready ? "✅" : "❌"}</p>
 		</div>
 	{/each}
-	<div class="flex flex-col">
-		<button
-			class="border px-2 py-0.5 rounded border-dashed block mt-8 disabled:opacity-50 cursor-pointer"
-			disabled={started}
-			onclick={disconnectAll}>Disconnect all</button
-		>
-		<button
-			class="border px-2 py-0.5 rounded border-dashed block mt-8 disabled:opacity-50 cursor-pointer"
-			disabled={started}
-			onclick={resetGame}>Reset game</button
-		>
-	</div>
+	{#snippet bottom()}
+		<div class="flex flex-col gap-2">
+			<button
+				class="border px-2 py-0.5 rounded border-dashed block disabled:opacity-50 cursor-pointer"
+				disabled={started}
+				onclick={disconnectAll}>Disconnect all</button
+			>
+			<button
+				class="border px-2 py-0.5 rounded border-dashed block disabled:opacity-50 cursor-pointer"
+				disabled={started}
+				onclick={resetGame}>Reset game</button
+			>
+		</div>
+	{/snippet}
 </BottomBox>

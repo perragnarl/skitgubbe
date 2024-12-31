@@ -9,10 +9,8 @@
 	};
 </script>
 
-<!-- svelte-ignore attribute_global_event_reference -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
+<button
+	type="button"
 	class="inline-flex relative border border-black rounded p-2 h-32 w-22 cursor-pointer hover:shadow-lg"
 	{onclick}
 >
@@ -36,4 +34,4 @@
 			>
 		</div> -->
 	{/if}
-</div>
+</button>

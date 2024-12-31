@@ -31,7 +31,7 @@ if (isDocker) {
     console.log(`Server is running on port ${PORT}`);
   });
 } else {
-  io = new Server(3000, {
+  io = new Server(1337, {
     cors: {
       origin: ["http://localhost:5173"],
     },
@@ -108,6 +108,7 @@ io.on("connection", (socket) => {
   socket.on("reset-game", () => {
     resetGame();
     updatePlayer();
+    io.emit("reset-game");
   });
 
   // Handle chat messages
@@ -153,11 +154,12 @@ io.on("connection", (socket) => {
       // Add the card to the player's table
       player.table.push(card);
 
-      // TODO: Logic to see if there are enough cards left in the deck before starting phase 2
       console.log("Cards left: ", deck.length);
-
-      if (deck.length === 0) {
+      
+      // TODO: Logic to see if there are enough cards left in the deck before starting phase 2
+      if (deck.length === 26) {
         gamePhase = 2;
+        io.emit("phase-change", gamePhase);
       } else {
         // Give a new card to the player
         player.hand.push(deck.shift());

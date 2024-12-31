@@ -35,7 +35,10 @@
 				onkeydown={handleInput}
 				bind:this={input}
 			/>
-			<button onclick={saveName}>💾</button>
+			<button
+				class="cursor-pointer disabled:opacity-50"
+				onclick={saveName}>💾</button
+			>
 		</div>
 	{:else}
 		<div class="flex justify-between items-center">

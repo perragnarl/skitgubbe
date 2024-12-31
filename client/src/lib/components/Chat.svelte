@@ -4,16 +4,10 @@
 
 	let messages = [];
 	let input = "";
+	let bottomBox;
 
 	$socket.on("chat", (player, msg) => {
-		messages = [
-			...messages,
-			{
-				player: player.name,
-				playerColor: player.color,
-				message: msg,
-			},
-		];
+		addToChat(player, msg);
 	});
 
 	function handleInput(event) {
@@ -27,17 +21,28 @@
 			input = "";
 		}
 	}
+
+	function addToChat(player, msg) {
+		messages = [
+			...messages,
+			{
+				player: player.name,
+				playerColor: player.color,
+				message: msg,
+			},
+		];
+		bottomBox.scrollToBottom();
+	}
 </script>
 
-<BottomBox title="Chatt">
-	<div class="flex flex-col h-full">
-		<div class="h-full flex flex-col gap-1 overflow-y-auto">
-			{#each messages as { player, playerColor, message }}
-                <p>
-                    <span style="color: {playerColor}">{player}:</span> {message}
-                </p>
-			{/each}
-		</div>
+<BottomBox title="Chatt" bind:this={bottomBox}>
+	{#each messages as { player, playerColor, message }}
+		<p>
+			<span style="color: {playerColor}">{player}:</span>
+			{message}
+		</p>
+	{/each}
+	{#snippet bottom()}
 		<input
 			class="border rounded w-full p-2 border-dashed mt-auto"
 			type="text"
@@ -45,5 +50,5 @@
 			bind:value={input}
 			on:keydown={handleInput}
 		/>
-	</div>
+	{/snippet}
 </BottomBox>

@@ -47,6 +47,13 @@
 		player = playerInfo;
 	});
 
+	// $socket.on("phase-change", (phase) => {
+	// 	if (phase === "end") {
+	// 		onGoing = false;
+	// 		started = false;
+	// 	}
+	// });
+
 	function changeName(name) {
 		$socket.emit("change-name", name);
 	}
