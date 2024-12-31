@@ -24,10 +24,11 @@
 		current: false,
 	});
 	let playerList = $state([]);
+	let deckCount = $state(0);
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
-		playerList = activePlayerList
+		playerList = activePlayerList;
 		onGoing = isStarted;
 	});
 
@@ -37,6 +38,10 @@
 
 	$socket.on("update-player", (playerInfo) => {
 		player = playerInfo;
+	});
+
+	$socket.on("update-deck", (newDeckCount) => {
+		deckCount = newDeckCount;
 	});
 
 	$socket.on("all-ready", () => {
@@ -75,6 +80,10 @@
 
 		$socket.emit("play-card", card);
 	}
+
+	function playFromDeck() {
+		$socket.emit("play-from-deck");
+	}
 </script>
 
 <main class="container mx-auto p-4 relative flex flex-col justify-between">
@@ -94,14 +103,12 @@
 						Motståndare hand
 						<div>
 							{#each p.hand as { suit, label }}
-								<Card {suit} {label} hidden onclick={null} />
+								<Card {suit} {label} hidden />
 							{/each}
 						</div>
 						Motståndare valv
 						<div>
-							{#each p.vault as { suit, label }}
-								<Card {suit} {label} hidden />
-							{/each}
+							<Card count={p.vault.length} hidden />
 						</div>
 					</Hand>
 				{/if}
@@ -128,13 +135,20 @@
 						</div>
 						Ditt valv
 						<div>
-							{#each p.vault as { suit, label }}
-								<Card {suit} {label} />
-							{/each}
+							<Card count={p.vault.length} hidden />
 						</div>
 					</Hand>
 				{/if}
 			{/each}
+		</div>
+
+		<div>
+			Högen
+			<div class="relative">
+				<div class="absolute">
+					<Card count={deckCount} hidden onclick={playFromDeck} />
+				</div>
+			</div>
 		</div>
 	{:else}
 		<Lobby bind:player readychange={readyChange} {onGoing} />

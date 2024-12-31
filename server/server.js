@@ -137,19 +137,34 @@ io.on("connection", (socket) => {
     if (players.every((p) => p.ready)) {
       console.log("All players are ready");
       io.emit("all-ready");
+      updateDeckCount();
       startGame();
     }
   });
 
+  socket.on("play-from-deck", () => {
+    const card = deck.shift();
+    playCard({ card, fromDeck: true });
+  });
+
   // Handle card play
   socket.on("play-card", (card) => {
+    playCard({ card });
+  });
+
+  function playCard({
+    card,
+    fromDeck = false,
+  }) {
     if (gamePhase === 1) {
       console.log(`${player.id} played ${card.value} of ${card.suit}`);
 
       // Remove the card from the player's hand
-      player.hand = player.hand.filter(
-        (c) => c.value !== card.value || c.suit !== card.suit
-      );
+      if (!fromDeck) {
+        player.hand = player.hand.filter(
+          (c) => c.value !== card.value || c.suit !== card.suit
+        );
+      }
 
       // Add the card to the player's table
       player.table.push(card);
@@ -157,12 +172,16 @@ io.on("connection", (socket) => {
       console.log("Cards left: ", deck.length);
       
       // TODO: Logic to see if there are enough cards left in the deck before starting phase 2
-      if (deck.length === 26) {
+      if (deck.length === 32) {
         gamePhase = 2;
+        initPhase2();
         io.emit("phase-change", gamePhase);
       } else {
         // Give a new card to the player
-        player.hand.push(deck.shift());
+        if (!fromDeck) {
+          player.hand.push(deck.shift());
+        }
+        updateDeckCount();
 
         // Remove current player status
         player.current = false;
@@ -254,7 +273,31 @@ io.on("connection", (socket) => {
 
     // Update the player
     updatePlayer();
-  });
+  }
+
+  function initPhase2() {
+    // Move all cards from the players tables to their vaults
+    players.forEach((p) => {
+      p.vault.push(...p.table);
+      p.table = [];
+    });
+    
+    // Move all cards from players vault to players hand
+    players.forEach((p) => {
+      p.hand.push(...p.vault);
+      p.vault = [];
+    });
+
+    // Sort the cards in the players hands by suit and value
+    players.forEach((p) => {
+      p.hand.sort((a, b) => {
+        if (a.suit === b.suit) {
+          return a.value - b.value;
+        }
+        return a.suit - b.suit;
+      });
+    });
+  }
 
   function resetGame() {
     players.forEach((player) => {
@@ -297,12 +340,17 @@ io.on("connection", (socket) => {
     });
 
     updatePlayers();
+    updateDeckCount();
 
     // Randomly select a player to start
     let currentPlayer = players[Math.floor(Math.random() * players.length)];
     console.log(`Starting with ${currentPlayer.id}`);
     currentPlayer.current = true;
     updatePlayer();
+  }
+
+  function updateDeckCount() {
+    io.emit("update-deck", deck.length);
   }
 
   function updatePlayer() {

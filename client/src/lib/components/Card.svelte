@@ -1,5 +1,11 @@
 <script>
-	let { suit, label, hidden = false, onclick = null } = $props();
+	let {
+		suit = "",
+		label = "",
+		count = 0,
+		hidden = false,
+		onclick = null,
+	} = $props();
 
 	let suits = {
 		hearts: { symbol: "♥", color: "red" },
@@ -14,10 +20,13 @@
 	class="inline-flex relative border border-black rounded p-2 h-32 w-22 cursor-pointer hover:shadow-lg"
 	{onclick}
 >
-	{#if hidden}
+	{#if hidden || count > 1}
 		<div
 			class="absolute left-0 right-0 top-0 bottom-0 bg-gray-200 rounded"
 		></div>
+		{#if count > 1}
+			<span class="text-4xl z-10 self-center w-full">{count}</span>
+		{/if}
 	{:else}
 		<div class="absolute flex flex-col items-center top-4 left-4">
 			<span class="text-2xl">{label}</span>
