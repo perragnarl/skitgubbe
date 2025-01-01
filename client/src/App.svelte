@@ -20,6 +20,8 @@
 		color: "",
 		ready: false,
 		hand: [],
+		vault: [],
+		selected: [],
 		table: [],
 		current: false,
 	});
@@ -28,6 +30,13 @@
 	let trumpSuit = $state("");
 	let countdown = $state(-1);
 	let started = $derived(countdown === 0 ? true : false);
+
+	$effect(() => {
+		console.log("before Started", started);
+		started ? phase = 1 : null;
+		console.log("Started", started);
+		
+	})
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
@@ -67,6 +76,11 @@
 		phase = newPhase;
 	});
 
+	$socket.on("invalid-cards", () => {
+		player.selected = [];
+		alert("Invalid cards selected");
+	});
+
 	function changeName(name) {
 		$socket.emit("change-name", name);
 	}
@@ -83,10 +97,20 @@
 		$socket.emit("reset-game");
 	}
 
-	function playCard(card, current) {
+	function clickCard(card, current, isSelected) {
 		if (!current) return;
 
-		$socket.emit("play-card", card);
+		if (phase === 1) {
+			$socket.emit("play-card", card);
+			return;
+		}
+
+		// If card is selected emit the selected cards
+		if (isSelected) {
+			$socket.emit("play-cards", player.selected);
+		} else {
+			player.selected = [...player.selected, card];
+		}
 	}
 
 	function playFromDeck() {
@@ -136,10 +160,17 @@
 						Din hand
 						<div>
 							{#each p.hand as card}
+								{@const isSelected = player.selected.some(
+									(c) =>
+										c.suit === card.suit &&
+										c.label === card.label,
+								)}
+
 								<Card
 									suit={card.suit}
 									label={card.label}
-									onclick={() => playCard(card, p.current)}
+									onclick={() => clickCard(card, p.current, isSelected)}
+									selected={isSelected}
 								/>
 							{/each}
 						</div>

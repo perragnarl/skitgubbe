@@ -82,6 +82,7 @@ io.on("connection", (socket) => {
     color: colors[players.length + 1],
     hand: [],
     table: [],
+    selected: [],
     vault: [],
     current: false,
     inBattle: false,
@@ -175,22 +176,104 @@ io.on("connection", (socket) => {
   // Handle deck play (chansa)
   socket.on("play-from-deck", () => {
     const card = deck.shift();
-    playCard({ card, fromDeck: true });
+    playCards({ cards: [card], fromDeck: true });
   });
 
-  // Handle card play
+  // Handle single card play (phase 1)
   socket.on("play-card", (card) => {
-    playCard({ card });
+    playCards({ cards: [card] });
   });
 
-  function playCard({ card, fromDeck = false }) {
+  // Handle multiple card play (phase 2)
+  socket.on("play-cards", (cards) => {
+    // Check if the cards are valid
+    const valid = checkCards(cards);
+    if (valid) {
+      playCards({ cards });
+    } else {
+      socket.emit("invalid-cards");
+    }
+  });
+
+  function checkCards(cards) {
+    /*
+     *  Check if the cards are valid
+     *  - Same suit
+     *  - In sequence
+     *  - Higher than the previous player
+     *  - Trump suit if the previous player played a different suit
+     */
+    let isTrump = false;
+
+    // Check if the cards are of the same suit
+    const suit = cards[0].suit;
+    cards.forEach((card) => {
+      if (card.suit !== suit) {
+        return false;
+      }
+    });
+
+    // Check if the cards are trump
+    if (suit === trumpSuit) {
+      isTrump = true;
+    }
+
+    // Check if the cards are in sequence
+    for (let i = 0; i < cards.length - 1; i++) {
+      if (cards[i].value !== cards[i + 1].value + 1) {
+        return false;
+      }
+    }
+
+    // Get the previous player
+    const previousPlayer = players.find(
+      (p) => p.id !== player.id && p.table.length > 0
+    );
+
+    /*
+     *  Check if the suit is the same as previous player
+     *  or if the current player played trump and the previous player did not
+     */
+    if (previousPlayer && suit !== previousPlayer.table[0].suit) {
+      if (isTrump && previousPlayer.table[0].suit !== trumpSuit) {
+        // If the current player played trump
+      } else {
+        // If the current player did not play trump
+        return false;
+      }
+    }
+
+    // Check if the lowest card is higher than the highest card played by the previous player
+    const currentPlayerLowestCard = cards.reduce((minCard, currentCard) => {
+      return currentCard.value < minCard.value ? currentCard : minCard;
+    }, cards[0]);
+
+    if (previousPlayer) {
+      // Find the highest card played by the previous player
+      const previousPlayerHighestCard = previousPlayer.table.reduce(
+        (maxCard, currentCard) => {
+          return currentCard.value > maxCard.value ? currentCard : maxCard;
+        },
+        previousPlayer.table[0]
+      );
+
+      // Check if the current player's lowest card is higher than the previous player's highest card
+      if (currentPlayerLowestCard.value < previousPlayerHighestCard.value) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function playCards({ cards, fromDeck = false }) {
     if (gamePhase === 1) {
-      playPhase1Card(card, fromDeck);
+      playPhase1Card(cards[0], fromDeck);
 
       // Update the deck count
       updateDeckCount();
     } else if (gamePhase === 2) {
-      playPhase2Card(card);
+      playPhase2Card(cards);
     }
 
     // Update the player
@@ -260,8 +343,8 @@ io.on("connection", (socket) => {
     }
   }
 
-  function playPhase2Card(card) {
-    console.log(`${player.id} played ${card.value} of ${card.suit}`);
+  function playPhase2Card(cards) {
+    console.log(`${player.id} played ${cards.length} cards`);
   }
 
   function setNextPlayer() {

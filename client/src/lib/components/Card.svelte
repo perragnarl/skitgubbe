@@ -4,6 +4,7 @@
 		label = "",
 		count = 0,
 		hidden = false,
+		selected = false,
 		onclick = null,
 	} = $props();
 
@@ -17,7 +18,7 @@
 
 <button
 	type="button"
-	class="inline-flex relative border border-black rounded p-2 h-32 w-22 cursor-pointer hover:shadow-lg"
+	class="inline-flex mx-1 relative border border-black rounded p-2 h-32 w-22 cursor-pointer hover:shadow-lg {selected ? 'border-2 border-blue-500' : ''}"
 	{onclick}
 >
 	{#if hidden || count > 1}
