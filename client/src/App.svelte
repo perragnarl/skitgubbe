@@ -1,8 +1,10 @@
 <script>
 	import { io } from "socket.io-client";
 	import { socket } from "./store.js";
-	
-	$socket = io(window.location.origin);
+
+	const hostname = window.location.hostname;
+	const port = import.meta.env.PROD ? window.location.port : 1337;
+	$socket = io(`http://${hostname}:${port}`);
 
 	import Chat from "./lib/components/Chat.svelte";
 	import Lobby from "./lib/components/Lobby.svelte";
@@ -32,12 +34,12 @@
 	let started = $derived(countdown === 0 ? true : false);
 
 	$effect(() => {
-		console.log("before Started", started);
 		started ? (phase = 1) : null;
-		console.log("Started", started);
 	});
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
+		console.log("Connected to server");
+
 		player = playerInfo;
 		playerList = activePlayerList;
 		onGoing = isStarted;

@@ -92,6 +92,8 @@ io.on("connection", (socket) => {
   // Add the player to the list of players
   players.push(player);
 
+  console.log("Players", players);
+
   socket.emit("connection", player, players, isStarted);
 
   // Notify other players that a new player has joined
@@ -152,7 +154,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (players.every((p) => p.ready)) {
+    if (players.length > 1 && players.every((p) => p.ready)) {
       console.log("All players are ready");
       io.emit("all-ready");
       updateDeckCount();
@@ -212,11 +214,13 @@ io.on("connection", (socket) => {
         return false;
       }
     });
+    console.log("Same suit");
 
     // Check if the cards are trump
     if (suit === trumpSuit) {
       isTrump = true;
     }
+    console.log("Trump suit");
 
     // Check if the cards are in sequence
     for (let i = 0; i < cards.length - 1; i++) {
@@ -224,11 +228,13 @@ io.on("connection", (socket) => {
         return false;
       }
     }
+    console.log("In sequence");
 
     // Get the previous player
     const previousPlayer = players.find(
       (p) => p.id !== player.id && p.table.length > 0
     );
+    console.log("Previous player", previousPlayer.name);
 
     /*
      *  Check if the suit is the same as previous player
@@ -237,11 +243,13 @@ io.on("connection", (socket) => {
     if (previousPlayer && suit !== previousPlayer.table[0].suit) {
       if (isTrump && previousPlayer.table[0].suit !== trumpSuit) {
         // If the current player played trump
+        console.log("Trump played");
       } else {
         // If the current player did not play trump
         return false;
       }
     }
+    console.log("Same suit as previous player or trump played");
 
     // Check if the lowest card is higher than the highest card played by the previous player
     const currentPlayerLowestCard = cards.reduce((minCard, currentCard) => {
@@ -262,6 +270,7 @@ io.on("connection", (socket) => {
         return false;
       }
     }
+    console.log("Higher than previous player");
 
     return true;
   }
