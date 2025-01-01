@@ -2,7 +2,7 @@
 	import { io } from "socket.io-client";
 	import { socket } from "./store.js";
 
-	$socket = io("http://localhost:1337");
+	$socket = io(`${window.location.hostname}:1337`);
 
 	import Chat from "./lib/components/Chat.svelte";
 	import Lobby from "./lib/components/Lobby.svelte";
@@ -13,6 +13,7 @@
 	import Hand from "./lib/components/Hand.svelte";
 
 	let started = $state(false);
+	let phase = $state(0);
 	let onGoing = $state(false);
 	let player = $state({
 		id: "",
@@ -25,6 +26,7 @@
 	});
 	let playerList = $state([]);
 	let deckCount = $state(0);
+	let trumpSuit = $state("");
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
@@ -52,12 +54,13 @@
 		player = playerInfo;
 	});
 
-	// $socket.on("phase-change", (phase) => {
-	// 	if (phase === "end") {
-	// 		onGoing = false;
-	// 		started = false;
-	// 	}
-	// });
+	$socket.on("trump-suit", (suit) => {
+		trumpSuit = suit;
+	});
+
+	$socket.on("phase-change", (newPhase) => {
+		phase = newPhase;
+	});
 
 	function changeName(name) {
 		$socket.emit("change-name", name);
@@ -106,10 +109,12 @@
 								<Card {suit} {label} hidden />
 							{/each}
 						</div>
-						Motståndare valv
-						<div>
-							<Card count={p.vault.length} hidden />
-						</div>
+						{#if p.vault.length > 0}
+							Motståndare valv
+							<div>
+								<Card count={p.vault.length} hidden />
+							</div>
+						{/if}
 					</Hand>
 				{/if}
 			{/each}
@@ -133,23 +138,36 @@
 								/>
 							{/each}
 						</div>
-						Ditt valv
-						<div>
-							<Card count={p.vault.length} hidden />
-						</div>
+						{#if p.vault.length > 0}
+							Ditt valv
+							<div>
+								<Card count={p.vault.length} hidden />
+							</div>
+						{/if}
 					</Hand>
 				{/if}
 			{/each}
 		</div>
 
-		<div>
-			Högen
-			<div class="relative">
-				<div class="absolute">
-					<Card count={deckCount} hidden onclick={playFromDeck} />
+		{#if deckCount > 0}
+			<div>
+				Högen
+				<div class="relative">
+					<div class="absolute">
+						<Card count={deckCount} hidden onclick={playFromDeck} />
+					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
+
+		{#if trumpSuit !== ""}
+			<div>
+				Trump
+				<div>
+					Trumf: {trumpSuit}
+				</div>
+			</div>
+		{/if}
 	{:else}
 		<Lobby bind:player readychange={readyChange} {onGoing} />
 	{/if}
