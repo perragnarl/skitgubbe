@@ -27,7 +27,7 @@
 	let deckCount = $state(0);
 	let trumpSuit = $state("");
 	let countdown = $state(-1);
-	let started = $derived(countdown === 0 ? true : false)
+	let started = $derived(countdown === 0 ? true : false);
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
@@ -49,6 +49,10 @@
 
 	$socket.on("countdown", (timeleft) => {
 		countdown = timeleft;
+	});
+
+	$socket.on("countdown-aborted", () => {
+		countdown = -1;
 	});
 
 	$socket.on("current-player", (playerInfo) => {
@@ -153,10 +157,8 @@
 		{#if deckCount > 0}
 			<div>
 				Högen
-				<div class="relative">
-					<div class="absolute">
-						<Card count={deckCount} hidden onclick={playFromDeck} />
-					</div>
+				<div>
+					<Card count={deckCount} hidden onclick={playFromDeck} />
 				</div>
 			</div>
 		{/if}

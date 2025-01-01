@@ -63,6 +63,7 @@ let isStarted = false;
 let battleRound = false;
 let battleStack = [];
 let trumpSuit = "";
+let countdownInterval;
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
@@ -141,17 +142,25 @@ io.on("connection", (socket) => {
 
     updatePlayer();
 
-    // if (players.length > 2 && players.every((p) => p.ready)) {
+    if (!ready) {
+      // Abort the countdown if a player is not ready
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        io.emit("countdown-aborted");
+      }
+      return;
+    }
+
     if (players.every((p) => p.ready)) {
       console.log("All players are ready");
       io.emit("all-ready");
       updateDeckCount();
 
       // Start the countdown timer
-      let countdown = countdownTime;
+      let countdown = 5;
       io.emit("countdown", countdown);
 
-      const countdownInterval = setInterval(() => {
+      countdownInterval = setInterval(() => {
         countdown -= 1;
         io.emit("countdown", countdown);
 
@@ -163,6 +172,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Handle deck play (chansa)
   socket.on("play-from-deck", () => {
     const card = deck.shift();
     playCard({ card, fromDeck: true });
