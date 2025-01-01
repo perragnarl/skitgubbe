@@ -6,6 +6,7 @@
 - [x] Phase 1 (mostly complete)
 - [ ] Phase 2
 - [ ] Ending
+- [ ] User Interface
 - [ ] Scoreboard
 - [ ] Leaderboard
 
