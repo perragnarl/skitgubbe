@@ -1,5 +1,5 @@
 <script>
-	let { player = $bindable(), readychange, onGoing } = $props();
+	let { player = $bindable(), readychange, onGoing, countdown } = $props();
 
 	function handleReady(ready) {
 		readychange(ready);
@@ -26,4 +26,9 @@
 			</button>
 		{/if}
 	</div>
+	{#if countdown > 0}
+		<div class="flex justify-center">
+			<p class="text-center text-4xl">Spelet startar om: {countdown}</p>
+		</div>
+	{/if}
 {/if}

@@ -12,7 +12,6 @@
 	import Card from "./lib/components/Card.svelte";
 	import Hand from "./lib/components/Hand.svelte";
 
-	let started = $state(false);
 	let phase = $state(0);
 	let onGoing = $state(false);
 	let player = $state({
@@ -27,6 +26,8 @@
 	let playerList = $state([]);
 	let deckCount = $state(0);
 	let trumpSuit = $state("");
+	let countdown = $state(-1);
+	let started = $derived(countdown === 0 ? true : false)
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
@@ -46,8 +47,8 @@
 		deckCount = newDeckCount;
 	});
 
-	$socket.on("all-ready", () => {
-		started = true;
+	$socket.on("countdown", (timeleft) => {
+		countdown = timeleft;
 	});
 
 	$socket.on("current-player", (playerInfo) => {
@@ -169,7 +170,7 @@
 			</div>
 		{/if}
 	{:else}
-		<Lobby bind:player readychange={readyChange} {onGoing} />
+		<Lobby bind:player readychange={readyChange} {onGoing} {countdown} />
 	{/if}
 
 	<div

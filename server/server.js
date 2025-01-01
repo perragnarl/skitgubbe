@@ -47,6 +47,7 @@ function setupProduction() {
 }
 
 const maxPlayers = 4;
+const countdownTime = 5;
 const colors = {
   1: "red",
   2: "blue",
@@ -54,6 +55,7 @@ const colors = {
   4: "orange",
   5: "purple",
 };
+
 let players = [];
 let gamePhase = 0;
 let deck = [];
@@ -144,7 +146,20 @@ io.on("connection", (socket) => {
       console.log("All players are ready");
       io.emit("all-ready");
       updateDeckCount();
-      startGame();
+
+      // Start the countdown timer
+      let countdown = countdownTime;
+      io.emit("countdown", countdown);
+
+      const countdownInterval = setInterval(() => {
+        countdown -= 1;
+        io.emit("countdown", countdown);
+
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          startGame();
+        }
+      }, 1000);
     }
   });
 
