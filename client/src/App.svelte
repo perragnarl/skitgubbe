@@ -1,8 +1,8 @@
 <script>
 	import { io } from "socket.io-client";
 	import { socket } from "./store.js";
-
-	$socket = io(`${window.location.hostname}:1337`);
+	
+	$socket = io(window.location.origin);
 
 	import Chat from "./lib/components/Chat.svelte";
 	import Lobby from "./lib/components/Lobby.svelte";
@@ -33,10 +33,9 @@
 
 	$effect(() => {
 		console.log("before Started", started);
-		started ? phase = 1 : null;
+		started ? (phase = 1) : null;
 		console.log("Started", started);
-		
-	})
+	});
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		player = playerInfo;
@@ -169,7 +168,8 @@
 								<Card
 									suit={card.suit}
 									label={card.label}
-									onclick={() => clickCard(card, p.current, isSelected)}
+									onclick={() =>
+										clickCard(card, p.current, isSelected)}
 									selected={isSelected}
 								/>
 							{/each}
