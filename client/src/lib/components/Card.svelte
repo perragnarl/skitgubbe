@@ -1,4 +1,6 @@
 <script>
+	import { suits } from "../utils/suits";
+
 	let {
 		suit = "",
 		label = "",
@@ -7,13 +9,6 @@
 		selected = false,
 		onclick = null,
 	} = $props();
-
-	let suits = {
-		hearts: { symbol: "♥", color: "red" },
-		diamonds: { symbol: "♦", color: "red" },
-		clubs: { symbol: "♣", color: "black" },
-		spades: { symbol: "♠", color: "black" },
-	};
 </script>
 
 <button

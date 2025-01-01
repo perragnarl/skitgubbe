@@ -13,6 +13,7 @@
 	import PlayerList from "./lib/components/PlayerList.svelte";
 	import Card from "./lib/components/Card.svelte";
 	import Hand from "./lib/components/Hand.svelte";
+	import { suits } from "./lib/utils/suits.js";
 
 	let phase = $state(0);
 	let onGoing = $state(false);
@@ -127,20 +128,20 @@
 			{#each playerList as p}
 				{#if p.id !== player.id}
 					<Hand current={p.current}>
-						Motståndare bord
+						{p.name} bord
 						<div>
 							{#each p.table as { suit, label }}
 								<Card {suit} {label} />
 							{/each}
 						</div>
-						Motståndare hand
+						{p.name} hand
 						<div>
 							{#each p.hand as { suit, label }}
 								<Card {suit} {label} hidden />
 							{/each}
 						</div>
 						{#if p.vault.length > 0}
-							Motståndare valv
+							{p.name} valv
 							<div>
 								<Card count={p.vault.length} hidden />
 							</div>
@@ -198,10 +199,11 @@
 
 		{#if trumpSuit !== ""}
 			<div>
-				Trump
-				<div>
-					Trumf: {trumpSuit}
-				</div>
+				Trumf:
+				<span style="color: {suits[trumpSuit].color};">
+					{suits[trumpSuit].symbol}
+				</span>
+				{suits[trumpSuit].label}
 			</div>
 		{/if}
 	{:else}

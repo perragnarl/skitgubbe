@@ -48,6 +48,7 @@ function setupProduction() {
 
 const maxPlayers = 4;
 const countdownTime = 5;
+const moveCardsFromTableToVaultDelay = 1.5;
 const colors = {
   1: "red",
   2: "blue",
@@ -160,7 +161,7 @@ io.on("connection", (socket) => {
       updateDeckCount();
 
       // Start the countdown timer
-      let countdown = 5;
+      let countdown = countdownTime;
       io.emit("countdown", countdown);
 
       countdownInterval = setInterval(() => {
@@ -366,14 +367,17 @@ io.on("connection", (socket) => {
     }
   }
 
-  function setRoundWinner(winner) {
-    // Move all cards from the players tables to the winner's vault
+  async function setRoundWinner(winner) {
+    // Announce the winner
+    socket.emit("round-winner", winner);
+
+    // Wait for a moment before moving the cards, TODO: Not working
+    // await delay(moveCardsFromTableToVaultDelay * 1000);
+
     players.forEach((p) => {
       winner.vault.push(...p.table);
       p.table = [];
     });
-
-    socket.emit("round-winner", winner);
 
     // Reset battle round
     if (battleRound) {
@@ -514,5 +518,9 @@ io.on("connection", (socket) => {
 
   function updatePlayers() {
     io.emit("update-players", players);
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 });
