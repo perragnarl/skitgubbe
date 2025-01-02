@@ -115,6 +115,10 @@
 		}
 	}
 
+	function pickUp() {
+		$socket.emit("pick-up", player);
+	}
+
 	function playFromDeck() {
 		$socket.emit("play-from-deck");
 	}
@@ -130,9 +134,17 @@
 					<Hand current={p.current}>
 						{p.name} bord
 						<div>
-							{#each p.table as { suit, label }}
-								<Card {suit} {label} />
-							{/each}
+							{#if phase === 1}
+								{#each p.table as { suit, label }}
+									<Card {suit} {label} />
+								{/each}
+							{:else if phase === 2}
+								{#each p.table as cards}
+									{#each cards as { suit, label }}
+										<Card {suit} {label} />
+									{/each}
+								{/each}
+							{/if}
 						</div>
 						{p.name} hand
 						<div>
@@ -155,9 +167,17 @@
 					<Hand current={p.current}>
 						Ditt bord
 						<div>
-							{#each p.table as { suit, label }}
-								<Card {suit} {label} />
-							{/each}
+							{#if phase === 1}
+								{#each p.table as { suit, label }}
+									<Card {suit} {label} />
+								{/each}
+							{:else if phase === 2}
+								{#each p.table as cards}
+									{#each cards as { suit, label }}
+										<Card {suit} {label} />
+									{/each}
+								{/each}
+							{/if}
 						</div>
 						Din hand
 						<div>
@@ -176,6 +196,15 @@
 									selected={isSelected}
 								/>
 							{/each}
+							{#if phase === 2}
+								<button
+									onclick={pickUp}
+									disabled={!p.current}
+									class="bg-red-700 text-white px-1 py-0.5"
+								>
+									Ta upp
+								</button>
+							{/if}
 						</div>
 						{#if p.vault.length > 0}
 							Ditt valv
