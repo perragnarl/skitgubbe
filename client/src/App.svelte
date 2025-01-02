@@ -14,6 +14,7 @@
 	import Card from "./lib/components/Card.svelte";
 	import Hand from "./lib/components/Hand.svelte";
 	import { suits } from "./lib/utils/suits.js";
+	import Scoreboard from "./lib/components/Scoreboard.svelte";
 
 	let phase = $state(0);
 	let onGoing = $state(false);
@@ -28,6 +29,7 @@
 		table: [],
 		current: false,
 	});
+	let scoreboard = $state([]);
 	let playerList = $state([]);
 	let deckCount = $state(0);
 	let trumpSuit = $state("");
@@ -81,6 +83,11 @@
 	$socket.on("invalid-cards", () => {
 		player.selected = [];
 		alert("Invalid cards selected");
+	});
+
+	$socket.on("game-over", (gameScoreboard) => {
+		scoreboard = gameScoreboard;
+		countdown = -1;
 	});
 
 	function changeName(name) {
@@ -235,6 +242,14 @@
 				{suits[trumpSuit].label}
 			</div>
 		{/if}
+	{:else if scoreboard.length > 0}
+		<Scoreboard {scoreboard} />
+		<button
+			onclick={resetGame}
+			class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
+		>
+			Spela igen
+		</button>
 	{:else}
 		<Lobby bind:player readychange={readyChange} {onGoing} {countdown} />
 	{/if}

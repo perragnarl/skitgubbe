@@ -264,8 +264,7 @@ io.on("connection", (socket) => {
     );
 
     if (previousPlayer) {
-      const prevPlayerLastStack =
-        previousPlayer.table[previousPlayer.table.length - 1];
+      const prevPlayerLastStack = previousPlayer.table.at(-1);
       const previousPlayerData = {
         lastStack: prevPlayerLastStack,
         suit: prevPlayerLastStack[0].suit,
@@ -305,13 +304,13 @@ io.on("connection", (socket) => {
         }
       }
 
-      // Check if the current player's lowest card is higher than the previous player's highest card
-      if (
-        currentPlayerLowestCard.value < previousPlayerData.highestCard.value
-      ) {
-        console.log(
-          "Current player's lowest card is lower than previous player's highest card"
-        );
+      // Check if the current player is playing cards of same suit but lower value
+      const sameSuit = previousPlayerData.suit === suit;
+      const lowerValue =
+        currentPlayerLowestCard.value < previousPlayerData.highestCard.value;
+      console.log();
+      if (sameSuit && lowerValue) {
+        console.log("Playing lower value than previous player");
         return false;
       }
     }
@@ -417,10 +416,13 @@ io.on("connection", (socket) => {
       io.emit("player-ended", player);
     }
 
-    // Check if no cards are left in the players' hands
-    if (players.every((p) => p.hand.length === 0)) {
-      console.log("Game over");
-      io.emit("all-players-ended", scoreboard);
+    // Check if there is only one player left with cards in hand
+    if (players.filter((p) => p.hand.length > 0).length === 1) {
+      console.log("Only one player left with cards in hand");
+
+      // Add the last player to the scoreboard
+      scoreboard.push(players.find((p) => p.hand.length > 0));
+      io.emit("game-over", scoreboard);
     }
 
     // Add the cards to the player's table
