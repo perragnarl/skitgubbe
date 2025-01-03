@@ -3,11 +3,11 @@
 ## Features
 - [x] Chat
 - [x] Lobby
-- [x] Phase 1 (mostly complete)
-- [ ] Phase 2
-- [ ] Ending
+- [x] Phase 1
+- [x] Phase 2 (Pick up needs fixing) 
+- [x] Ending
 - [ ] User Interface
-- [ ] Scoreboard
+- [x] Scoreboard
 - [ ] Leaderboard
 
 ## Beyond the horizon
