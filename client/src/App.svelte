@@ -11,10 +11,8 @@
 	import Log from "./lib/components/Log.svelte";
 	import Player from "./lib/components/Player.svelte";
 	import PlayerList from "./lib/components/PlayerList.svelte";
-	import Card from "./lib/components/Card.svelte";
-	import Hand from "./lib/components/Hand.svelte";
-	import { suits } from "./lib/utils/suits.js";
 	import Scoreboard from "./lib/components/Scoreboard.svelte";
+	import Game from "./lib/components/Game.svelte";
 
 	let phase = $state(0);
 	let onGoing = $state(false);
@@ -132,116 +130,17 @@
 </script>
 
 <main class="container mx-auto p-4 relative flex flex-col justify-between">
-	<h1 class="text-2xl font-bold">Skitgubbe</h1>
-
 	{#if started}
-		<div class="flex flex-col justify-between">
-			{#each playerList as p}
-				{#if p.id !== player.id}
-					<Hand current={p.current}>
-						{p.name} bord
-						<div>
-							{#if phase === 1}
-								{#each p.table as { suit, label }}
-									<Card {suit} {label} />
-								{/each}
-							{:else if phase === 2}
-								{#each p.table as cards}
-									{#each cards as { suit, label }}
-										<Card {suit} {label} />
-									{/each}
-								{/each}
-							{/if}
-						</div>
-						{p.name} hand
-						<div>
-							{#each p.hand as { suit, label }}
-								<Card {suit} {label} hidden />
-							{/each}
-						</div>
-						{#if p.vault.length > 0}
-							{p.name} valv
-							<div>
-								<Card count={p.vault.length} hidden />
-							</div>
-						{/if}
-					</Hand>
-				{/if}
-			{/each}
-
-			{#each playerList as p}
-				{#if p.id === player.id}
-					<Hand current={p.current}>
-						Ditt bord
-						<div>
-							{#if phase === 1}
-								{#each p.table as { suit, label }}
-									<Card {suit} {label} />
-								{/each}
-							{:else if phase === 2}
-								{#each p.table as cards}
-									{#each cards as { suit, label }}
-										<Card {suit} {label} />
-									{/each}
-								{/each}
-							{/if}
-						</div>
-						Din hand
-						<div>
-							{#each p.hand as card}
-								{@const isSelected = player.selected.some(
-									(c) =>
-										c.suit === card.suit &&
-										c.label === card.label,
-								)}
-
-								<Card
-									suit={card.suit}
-									label={card.label}
-									onclick={() =>
-										clickCard(card, p.current, isSelected)}
-									selected={isSelected}
-								/>
-							{/each}
-							{#if phase === 2}
-								<button
-									onclick={pickUp}
-									disabled={!p.current}
-									class="bg-red-700 text-white px-1 py-0.5"
-								>
-									Ta upp
-								</button>
-							{/if}
-						</div>
-						{#if p.vault.length > 0}
-							Ditt valv
-							<div>
-								<Card count={p.vault.length} hidden />
-							</div>
-						{/if}
-					</Hand>
-				{/if}
-			{/each}
-		</div>
-
-		{#if deckCount > 0}
-			<div>
-				Högen
-				<div>
-					<Card count={deckCount} hidden onclick={playFromDeck} />
-				</div>
-			</div>
-		{/if}
-
-		{#if trumpSuit !== ""}
-			<div>
-				Trumf:
-				<span style="color: {suits[trumpSuit].color};">
-					{suits[trumpSuit].symbol}
-				</span>
-				{suits[trumpSuit].label}
-			</div>
-		{/if}
+		<Game
+			{phase}
+			{player}
+			{playerList}
+			{deckCount}
+			{trumpSuit}
+			clickcard={clickCard}
+			pickup={pickUp}
+			playfromdeck={playFromDeck}
+		/>
 	{:else if scoreboard.length > 0}
 		<Scoreboard {scoreboard} />
 		<button

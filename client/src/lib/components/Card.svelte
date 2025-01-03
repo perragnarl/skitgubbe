@@ -13,12 +13,12 @@
 
 <button
 	type="button"
-	class="inline-flex mx-1 relative border border-black rounded p-2 h-32 w-22 cursor-pointer hover:shadow-lg {selected ? 'border-2 border-blue-500' : ''}"
+	class="inline-flex bg-white relative border-2 border-emerald-900 rounded-lg p-2 h-32 w-22 cursor-pointer hover:border-cyan-400 text-emerald-950 {selected ? 'border-2 border-blue-500' : ''}"
 	{onclick}
 >
 	{#if hidden || count > 1}
 		<div
-			class="absolute left-0 right-0 top-0 bottom-0 bg-gray-200 rounded"
+			class="absolute left-0 right-0 top-0 bottom-0 bg-gray-200 rounded-lg"
 		></div>
 		{#if count > 1}
 			<span class="text-4xl z-10 self-center w-full">{count}</span>

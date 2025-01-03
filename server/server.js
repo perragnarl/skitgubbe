@@ -48,7 +48,7 @@ function setupProduction() {
 
 const cardsLeftInDeckBeforePhase2 = 34; // Testing purposes
 const maxPlayers = 4;
-const countdownTime = 5;
+const countdownTime = 2;
 const moveCardsFromTableToVaultDelay = 1.5;
 const colors = {
   1: "red",
