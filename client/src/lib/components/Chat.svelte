@@ -1,10 +1,11 @@
 <script>
 	import { socket } from "../../store";
-	import BottomBox from "./BottomBox.svelte";
+	import Window from "./Window.svelte";
+	import { scrollToBottom } from "../utils/scrollToBottom";
 
 	let messages = [];
 	let input = "";
-	let bottomBox;
+	let chatWindow;
 
 	$socket.on("chat", (player, msg) => {
 		addToChat(player, msg);
@@ -31,24 +32,24 @@
 				message: msg,
 			},
 		];
-		bottomBox.scrollToBottom();
+		scrollToBottom(chatWindow);
 	}
 </script>
 
-<BottomBox title="Chatt" bind:this={bottomBox}>
-	{#each messages as { player, playerColor, message }}
-		<p>
-			<span style="color: {playerColor}">{player}:</span>
-			{message}
-		</p>
-	{/each}
-	{#snippet bottom()}
-		<input
-			class="border rounded w-full p-2 border-dashed mt-auto"
-			type="text"
-			placeholder="Skriv ett meddelande..."
-			bind:value={input}
-			on:keydown={handleInput}
-		/>
-	{/snippet}
-</BottomBox>
+<Window label="Chatt">
+	<div class="overflow-y-auto h-44 flex flex-col gap-1 mb-2" bind:this={chatWindow}>
+		{#each messages as { player, playerColor, message }}
+			<p>
+				<span style="color: {playerColor}">{player}:</span>
+				{message}
+			</p>
+		{/each}
+	</div>
+	<input
+		class="border rounded w-full p-2 border-primary-900 mt-auto"
+		type="text"
+		placeholder="Skriv ett meddelande..."
+		bind:value={input}
+		on:keydown={handleInput}
+	/>
+</Window>

@@ -3,6 +3,7 @@
 	import Card from "./Card.svelte";
 	import Deck from "./Deck.svelte";
 	import Opponent from "./Opponent.svelte";
+	import Window from "./Window.svelte";
 	import Yourself from "./Yourself.svelte";
 
 	let {

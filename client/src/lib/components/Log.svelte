@@ -1,9 +1,10 @@
 <script>
 	import { socket } from "../../store";
-	import BottomBox from "./BottomBox.svelte";
+	import { scrollToBottom } from "../utils/scrollToBottom";
+	import Window from "./Window.svelte";
 
 	let log = ["Välkommen till skitgubbe!"];
-	let bottomBox;
+	let logWindow;
 
 	$socket.on("new-player", (player) => {
 		addLogEntry(`${player.name} har anslutit till spelet.`);
@@ -22,7 +23,9 @@
 	});
 
 	$socket.on("ready-change", (player) => {
-		addLogEntry(`${player.name} är ${player.ready ? "redo" : "inte redo"}.`);
+		addLogEntry(
+			`${player.name} är ${player.ready ? "redo" : "inte redo"}.`,
+		);
 	});
 
 	$socket.on("all-ready", () => {
@@ -38,8 +41,10 @@
 	});
 
 	$socket.on("battle-round", (players) => {
-		addLogEntry(`${players.map((player) => player.name).join(", ")} spelade lika höga kort och får spela igen.`);
-	})
+		addLogEntry(
+			`${players.map((player) => player.name).join(", ")} spelade lika höga kort och får spela igen.`,
+		);
+	});
 
 	$socket.on("phase-change", (phase) => {
 		addLogEntry(`Fas ${phase - 1} avslutad, startar fas ${phase}`);
@@ -51,14 +56,14 @@
 
 	function addLogEntry(entry) {
 		log = [...log, entry];
-		bottomBox.scrollToBottom();
+		scrollToBottom(logWindow);
 	}
 </script>
 
-<BottomBox title="Logg" bind:this={bottomBox}>
-	<div class="text-xs flex flex-col gap-1">
+<Window label="Logg">
+	<div class="text-xs flex flex-col gap-1 h-44" bind:this={logWindow}>
 		{#each log as entry}
 			<p class="border-b border-gray-200 pb-1">{entry}</p>
 		{/each}
 	</div>
-</BottomBox>
+</Window>

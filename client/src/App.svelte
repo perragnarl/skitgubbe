@@ -13,6 +13,7 @@
 	import PlayerList from "./lib/components/PlayerList.svelte";
 	import Scoreboard from "./lib/components/Scoreboard.svelte";
 	import Game from "./lib/components/Game.svelte";
+	import Controls from "./lib/components/Controls.svelte";
 
 	let phase = $state(0);
 	let onGoing = $state(false);
@@ -129,7 +130,18 @@
 	}
 </script>
 
-<main class="container mx-auto p-4 relative flex flex-col justify-between">
+<main
+	class="container mx-auto p-4 relative flex flex-col justify-between h-screen select-none"
+>
+	<Controls />
+	<Chat />
+	<Log />
+	<PlayerList
+		resetgame={resetGame}
+		disconnectall={disconnectAll}
+		bind:playerList
+		{started}
+	/>
 	{#if started}
 		<Game
 			{phase}
@@ -152,18 +164,4 @@
 	{:else}
 		<Lobby bind:player readychange={readyChange} {onGoing} {countdown} />
 	{/if}
-
-	<div
-		class="fixed grid grid-cols-4 gap-2 justify-between bottom-0 left-0 right-0 p-4 border-t border-black container mx-auto"
-	>
-		<Log />
-		<Chat />
-		<Player changename={changeName} bind:player {started} />
-		<PlayerList
-			resetgame={resetGame}
-			disconnectall={disconnectAll}
-			bind:playerList
-			{started}
-		/>
-	</div>
 </main>
