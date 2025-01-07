@@ -13,7 +13,7 @@
 
 <button
 	type="button"
-	class="inline-flex bg-white relative border-2 border-primary-900 rounded-lg p-2 h-32 w-22 cursor-pointer hover:border-cyan-400 text-primary-900 {selected ? 'border-2 border-blue-500' : ''}"
+	class="inline-flex bg-white relative border-2 border-primary-900 rounded-lg p-2 h-32 w-22 cursor-pointer hover:border-primary-500 text-primary-900 {selected ? 'border-2 border-blue-500' : ''}"
 	{onclick}
 >
 	{#if hidden || count > 1}
@@ -30,13 +30,5 @@
 				{suits[suit].symbol}
 			</span>
 		</div>
-		<!-- <div
-			class="absolute flex flex-col items-center bottom-4 right-4 rotate-180"
-		>
-			<span class="text-2xl">{label}</span>
-			<span class="text-3xl" style="color: {suits[suit].color}"
-				>{suits[suit].symbol}</span
-			>
-		</div> -->
 	{/if}
 </button>

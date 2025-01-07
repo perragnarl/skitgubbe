@@ -1,14 +1,16 @@
 <script>
-	import { socket } from "../../store";
+	import { socket } from "../stores/socket";
 	import Window from "./Window.svelte";
 	import { scrollToBottom } from "../utils/scrollToBottom";
 
-	let messages = [];
-	let input = "";
+	let messages = $state([]);
+	let input = $state("");
 	let chatWindow;
 
 	$socket.on("chat", (player, msg) => {
 		addToChat(player, msg);
+		console.log(player, msg);
+		
 	});
 
 	function handleInput(event) {
@@ -36,8 +38,11 @@
 	}
 </script>
 
-<Window label="Chatt">
-	<div class="overflow-y-auto h-44 flex flex-col gap-1 mb-2" bind:this={chatWindow}>
+<Window label="Chatt" key="chat">
+	<div
+		class="overflow-y-auto h-44 flex flex-col gap-1 mb-2"
+		bind:this={chatWindow}
+	>
 		{#each messages as { player, playerColor, message }}
 			<p>
 				<span style="color: {playerColor}">{player}:</span>
@@ -50,6 +55,6 @@
 		type="text"
 		placeholder="Skriv ett meddelande..."
 		bind:value={input}
-		on:keydown={handleInput}
+		onkeydown={handleInput}
 	/>
 </Window>

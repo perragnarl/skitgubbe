@@ -17,16 +17,20 @@
 	}
 </script>
 
-<Window label="Spelare">
+<Window label="Spelare" key="playerList">
 	<ul class="mb-2">
 		{#each playerList as player}
-			<li class="flex justify-between items-center border-b border-primary-200 py-2">
+			<li
+				class="flex justify-between items-center border-b border-primary-200 py-2"
+			>
 				<p>{player.name}</p>
 				<p class="text-3xl leading-0">
 					{#if player.ready}
-					<iconify-icon icon="lineicons:check-circle-1"></iconify-icon>
+						<iconify-icon icon="lineicons:check-circle-1"
+						></iconify-icon>
 					{:else}
-					<iconify-icon icon="lineicons:xmark-circle"></iconify-icon>
+						<iconify-icon icon="lineicons:xmark-circle"
+						></iconify-icon>
 					{/if}
 				</p>
 			</li>

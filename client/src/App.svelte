@@ -1,19 +1,20 @@
 <script>
 	import { io } from "socket.io-client";
-	import { socket } from "./store.js";
+	import { socket } from "./lib/stores/socket";
+	import { windowStatus } from "./lib/stores/windows";
 
 	const hostname = window.location.hostname;
 	const port = import.meta.env.PROD ? window.location.port : 1337;
 	$socket = io(`http://${hostname}:${port}`);
 
 	import Chat from "./lib/components/Chat.svelte";
-	import Lobby from "./lib/components/Lobby.svelte";
 	import Log from "./lib/components/Log.svelte";
 	import Player from "./lib/components/Player.svelte";
 	import PlayerList from "./lib/components/PlayerList.svelte";
 	import Scoreboard from "./lib/components/Scoreboard.svelte";
 	import Game from "./lib/components/Game.svelte";
 	import Controls from "./lib/components/Controls.svelte";
+	import Status from "./lib/components/Status.svelte";
 
 	let phase = $state(0);
 	let onGoing = $state(false);
@@ -128,20 +129,31 @@
 	function playFromDeck() {
 		$socket.emit("play-from-deck");
 	}
+
+	function openWindow(key) {
+		windowStatus.update((status) => ({ ...status, [key]: true }));
+	}
 </script>
 
 <main
 	class="container mx-auto p-4 relative flex flex-col justify-between h-screen select-none"
 >
-	<Controls />
-	<Chat />
-	<Log />
-	<PlayerList
-		resetgame={resetGame}
-		disconnectall={disconnectAll}
-		bind:playerList
-		{started}
-	/>
+	{#if $windowStatus.log}
+		<Log />
+	{/if}
+	{#if $windowStatus.chat}
+		<Chat />
+	{/if}
+	{#if $windowStatus.playerList}
+		<PlayerList
+			resetgame={resetGame}
+			disconnectall={disconnectAll}
+			bind:playerList
+			{started}
+		/>
+	{/if}
+	<Controls openwindow={openWindow} />
+	<Status {onGoing} {phase} />
 	{#if started}
 		<Game
 			{phase}
@@ -161,7 +173,13 @@
 		>
 			Spela igen
 		</button>
-	{:else}
-		<Lobby bind:player readychange={readyChange} {onGoing} {countdown} />
 	{/if}
+	
+	<Player
+		changename={changeName}
+		readychange={readyChange}
+		{countdown}
+		{started}
+		{player}
+	/>
 </main>

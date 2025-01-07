@@ -1,62 +1,66 @@
 <script>
-	import { tick } from "svelte";
-	import BottomBox from "./BottomBox.svelte";
-
-	let { player = $bindable(), started, changename } = $props();
+	let { player, started, changename, readychange, countdown } = $props();
 
 	let edit = $state(false);
 	let input = $state(null);
+	let hasChangedName = $state(false);
+	let inputValue = $state("");
 
 	function saveName() {
-		changename(player.name);
+		changename(inputValue);
 		edit = false;
-	}
-
-	async function editName() {
-		edit = true;
-		await tick();
-		input.focus();
 	}
 
 	function handleInput(event) {
 		if (event.key === "Enter") {
 			saveName();
+			hasChangedName = true;
 		}
+	}
+
+	function handleReady(ready) {
+		readychange(ready);
 	}
 </script>
 
-<BottomBox title="Du">
-	{#if edit && !started}
-		<div class="flex justify-between items-center">
+<div class="fixed bottom-8 self-center flex flex-col">
+	{#if countdown > 0}
+		<p class="text-center mb-4 text-xl text-white">
+			Spelet startar om: {countdown} sekunder
+		</p>
+	{/if}
+	<div
+		class="flex items-stretch gap-1 bg-primary-50 p-3 rounded-md shadow-md relative z-10"
+	>
+		<iconify-icon icon="lineicons:user-4" class="text-3xl"></iconify-icon>
+		{#if !hasChangedName && !started}
 			<input
-				class="border border-dashed px-2 py-0.5 rounded"
+				class="border text-center border-primary-500 text-primary-900 px-2 py-0.5 rounded-md"
 				type="text"
-				bind:value={player.name}
+				placeholder="Välj namn"
+				bind:value={inputValue}
 				onkeydown={handleInput}
 				bind:this={input}
 			/>
-			<button
-				class="cursor-pointer disabled:opacity-50"
-				onclick={saveName}>💾</button
-			>
-		</div>
-	{:else}
-		<div class="flex justify-between items-center">
-			<p>
-				Namn:
-				<span style="color: {player.color}">
-					{player.name}
-				</span>
+		{:else}
+			<p class="font-semibold px-2 py-0.5 text-center">
+				{player.name}
 			</p>
-			<button
-				class="cursor-pointer disabled:opacity-50"
-				disabled={started}
-				onclick={editName}
+		{/if}
+
+		{#if player.ready}
+			<span
+				class="bg-emerald-700 rounded-full flex items-center justify-center w-8 h-8 text-3xl z-10 text-white"
 			>
-				✍️
+				<iconify-icon icon="lineicons:check"></iconify-icon>
+			</span>
+		{:else}
+			<button
+				class="bg-emerald-700 cursor-pointer font-semibold rounded-md text-white px-2 py-0.5 text-sm hover:bg-emerald-800"
+				onclick={handleReady}
+			>
+				Jag är redo
 			</button>
-		</div>
-	{/if}
-	<p>Redo: {player.ready ? "Ja" : "Nej"}</p>
-	<p>Din tur: {player.current ? "Ja" : "Nej"}</p>
-</BottomBox>
+		{/if}
+	</div>
+</div>

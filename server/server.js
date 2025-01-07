@@ -77,6 +77,12 @@ io.on("connection", (socket) => {
     return;
   }
 
+  // Check if the game has already started
+  if (isStarted) {
+    socket.emit("game-started", gamePhase);
+    return;
+  }
+
   // Create a player object
   let player = {
     id: socket.id,

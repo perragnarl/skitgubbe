@@ -1,9 +1,9 @@
 <script>
-	import { socket } from "../../store";
+	import { socket } from "../stores/socket"; 
 	import { scrollToBottom } from "../utils/scrollToBottom";
 	import Window from "./Window.svelte";
 
-	let log = ["Välkommen till skitgubbe!"];
+	let log = $state(["Välkommen till skitgubbe!"]);
 	let logWindow;
 
 	$socket.on("new-player", (player) => {
@@ -16,6 +16,10 @@
 
 	$socket.on("full", () => {
 		addLogEntry("Spelet är fullt.");
+	});
+
+	$socket.on("game-started", (phase) => {
+		addLogEntry(`Spelet har startat och är i fas ${phase}. Vänta till spelet är avslutat.`);
 	});
 
 	$socket.on("name-change", (names) => {
@@ -60,7 +64,7 @@
 	}
 </script>
 
-<Window label="Logg">
+<Window label="Logg" key="log">
 	<div class="text-xs flex flex-col gap-1 h-44" bind:this={logWindow}>
 		{#each log as entry}
 			<p class="border-b border-gray-200 pb-1">{entry}</p>

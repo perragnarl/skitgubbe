@@ -1,17 +1,17 @@
 <script>
 	import "iconify-icon";
-
-	let { left = 100, top = 100, label, closable = true, children } = $props();
+	import { windowStatus } from "../stores/windows"; 
+    
+	let { key, left = 100, top = 100, label, children } = $props();
 
 	let moving = false;
-	let open = $state(true);
-    let offsetX = 0;
-    let offsetY = 0;
+	let offsetX = 0;
+	let offsetY = 0;
 
 	function handleMouseDown(event) {
 		moving = true;
-        offsetX = left - event.clientX;
-        offsetY = top - event.clientY;
+		offsetX = left - event.clientX;
+		offsetY = top - event.clientY;
 	}
 
 	function handleMouseUp() {
@@ -26,7 +26,7 @@
 	}
 
 	function closeWindow() {
-		open = false;
+		windowStatus.update((status) => ({ ...status, [key]: false }));
 	}
 </script>
 
@@ -40,7 +40,7 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			onmousedown={handleMouseDown}
-			class="bg-primary-900 font-semibold cursor-move min-w-md rounded-md text-white flex justify-between px-2 py-1"
+			class="bg-primary-900 font-semibold cursor-move min-w-sm rounded-md text-white flex justify-between px-2 py-1"
 		>
 			<span>{label}</span>
 			<button

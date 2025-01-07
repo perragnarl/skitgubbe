@@ -30,7 +30,7 @@
 	}
 </script>
 
-<div class="flex flex-col justify-between">
+<div class="flex flex-col justify-between h-full">
 	{#each playerList as { name, table, hand, vault, current, id }}
 		{#if id !== player.id}
 			<Opponent
