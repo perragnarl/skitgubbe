@@ -182,17 +182,25 @@ io.on("connection", (socket) => {
         }
       }, 1000);
     }
+
+    updatePlayers();
   });
 
   // Handle deck play (chansa)
   socket.on("play-from-deck", () => {
     const card = deck.shift();
     playCards({ cards: [card], fromDeck: true });
+
+    // Update the players
+    updatePlayers();
   });
 
   // Handle single card play (phase 1)
   socket.on("play-card", (card) => {
     playCards({ cards: [card] });
+
+    // Update the players
+    updatePlayers();
   });
 
   // Handle multiple card play (phase 2)
@@ -204,6 +212,9 @@ io.on("connection", (socket) => {
     } else {
       socket.emit("invalid-cards");
     }
+
+    // Update the players
+    updatePlayers();
   });
 
   socket.on("pick-up", (player) => {
@@ -230,6 +241,9 @@ io.on("connection", (socket) => {
       // Add the lowest card array to the current player's hand
       player.hand.push(...lowestCardArray);
     }
+
+    // Update the players
+    updatePlayers();
   });
 
   function checkCards(cards) {
@@ -314,7 +328,6 @@ io.on("connection", (socket) => {
       const sameSuit = previousPlayerData.suit === suit;
       const lowerValue =
         currentPlayerLowestCard.value < previousPlayerData.highestCard.value;
-      console.log();
       if (sameSuit && lowerValue) {
         console.log("Playing lower value than previous player");
         return false;
@@ -333,9 +346,6 @@ io.on("connection", (socket) => {
     } else if (gamePhase === 2) {
       playPhase2Card(cards);
     }
-
-    // Update the players
-    updatePlayers();
   }
 
   function playPhase1Card(card, fromDeck = false) {
@@ -605,7 +615,10 @@ io.on("connection", (socket) => {
   }
 
   function updatePlayers() {
-    socket.emit("update-player", player);
+    // Get this player from the list of players
+    let thisPlayer = players.find((p) => p.id === socket.id);
+    
+    socket.emit("update-player", thisPlayer);
     io.emit("update-players", players);
   }
 

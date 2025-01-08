@@ -25,14 +25,14 @@
 	}
 </script>
 
-<div class="fixed bottom-8 self-center flex flex-col">
+<div class="flex flex-col self-center">
 	{#if countdown > 0}
-		<p class="text-center mb-4 text-xl text-white">
+		<span class="text-center mb-4 text-xl text-white">
 			Spelet startar om: {countdown} sekunder
-		</p>
+		</span>
 	{/if}
 	<div
-		class="flex items-stretch gap-1 bg-primary-50 p-3 rounded-md shadow-md relative z-10"
+		class="flex items-stretch gap-1 bg-primary-50 p-3 rounded-md shadow-md"
 	>
 		<iconify-icon icon="lineicons:user-4" class="text-3xl"></iconify-icon>
 		{#if !hasChangedName && !started}
@@ -45,9 +45,9 @@
 				bind:this={input}
 			/>
 		{:else}
-			<p class="font-semibold px-2 py-0.5 text-center">
+			<span class="font-semibold px-2 py-0.5 text-center">
 				{player.name}
-			</p>
+			</span>
 		{/if}
 
 		{#if player.ready}

@@ -13,15 +13,19 @@
 
 <button
 	type="button"
-	class="inline-flex bg-white relative border-2 border-primary-900 rounded-lg p-2 h-32 w-22 cursor-pointer hover:border-primary-500 text-primary-900 {selected ? 'border-2 border-blue-500' : ''}"
+	class="inline-flex {hidden
+		? 'deck-bg'
+		: 'bg-white'} relative border-2 border-primary-800 rounded-lg p-2 h-32 w-22 cursor-pointer hover:bg-primary-50 text-primary-800 shadow-md {selected
+		? 'border-2 border-blue-500'
+		: ''}"
 	{onclick}
 >
 	{#if hidden || count > 1}
-		<div
-			class="absolute left-0 right-0 top-0 bottom-0 bg-gray-200 rounded-lg"
-		></div>
 		{#if count > 1}
-			<span class="text-4xl z-10 self-center w-full">{count}</span>
+			<span
+				class="text-2xl font-semibold leading-6 block mx-auto z-10 self-center rounded-md p-1 bg-white"
+				>{count}</span
+			>
 		{/if}
 	{:else}
 		<div class="absolute flex flex-col items-center top-4 left-4">

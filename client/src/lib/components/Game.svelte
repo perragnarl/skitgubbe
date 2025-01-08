@@ -1,9 +1,7 @@
 <script>
 	import { suits } from "../utils/suits";
-	import Card from "./Card.svelte";
 	import Deck from "./Deck.svelte";
 	import Opponent from "./Opponent.svelte";
-	import Window from "./Window.svelte";
 	import Yourself from "./Yourself.svelte";
 
 	let {
@@ -26,11 +24,13 @@
 	}
 
 	function playFromDeck() {
-		playfromdeck();
+		if (player.current) {
+			playfromdeck();
+		}
 	}
 </script>
 
-<div class="flex flex-col justify-between h-full">
+<div class="flex flex-col justify-between gap-2 h-full">
 	{#each playerList as { name, table, hand, vault, current, id }}
 		{#if id !== player.id}
 			<Opponent
@@ -45,7 +45,7 @@
 		{/if}
 	{/each}
 
-	{#if deckCount > 0}
+	{#if deckCount > 0 && phase === 1}
 		<Deck count={deckCount} onclick={playFromDeck} />
 	{/if}
 

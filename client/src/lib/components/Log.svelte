@@ -65,7 +65,7 @@
 </script>
 
 <Window label="Logg" key="log">
-	<div class="text-xs flex flex-col gap-1 h-44" bind:this={logWindow}>
+	<div class="text-xs flex flex-col gap-1 h-44 overflow-y-auto" bind:this={logWindow}>
 		{#each log as entry}
 			<p class="border-b border-gray-200 pb-1">{entry}</p>
 		{/each}

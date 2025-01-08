@@ -40,10 +40,12 @@
 		started ? (phase = 1) : null;
 	});
 
+	$inspect(player)
+
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		console.log("Connected to server");
 
-		player = playerInfo;
+		player = {...playerInfo};
 		playerList = activePlayerList;
 		onGoing = isStarted;
 	});
@@ -53,7 +55,7 @@
 	});
 
 	$socket.on("update-player", (playerInfo) => {
-		player = playerInfo;
+		player = { ...playerInfo };
 	});
 
 	$socket.on("update-deck", (newDeckCount) => {
@@ -174,7 +176,7 @@
 			Spela igen
 		</button>
 	{/if}
-	
+
 	<Player
 		changename={changeName}
 		readychange={readyChange}

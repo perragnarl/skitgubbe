@@ -1,15 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary-50: #f6f8f5;
-    --color-primary-100: #eceeea;
-    --color-primary-200: #d7ded4;
-    --color-primary-300: #b8c3b2;
-    --color-primary-400: #909f89;
-    --color-primary-500: #708067;
-    --color-primary-600: #56644f;
-    --color-primary-700: #485342;
-    --color-primary-800: #3b4437;
-    --color-primary-900: #32382f;
-    --color-primary-950: #181d16;
+	--color-primary-50: #f6f8f5;
+	--color-primary-100: #eceeea;
+	--color-primary-200: #d7ded4;
+	--color-primary-300: #b8c3b2;
+	--color-primary-400: #909f89;
+	--color-primary-500: #708067;
+	--color-primary-600: #56644f;
+	--color-primary-700: #485342;
+	--color-primary-800: #3b4437;
+	--color-primary-900: #32382f;
+	--color-primary-950: #181d16;
+}
+
+@layer components {
+	.deck-bg {
+		--s: 40px; /* control the size*/
+		--c1: #f8b195;
+		--c2: #355c7d;
+
+		--_g: var(--c2) 6% 14%, var(--c1) 16% 24%, var(--c2) 26% 34%,
+			var(--c1) 36% 44%, var(--c2) 46% 54%, var(--c1) 56% 64%,
+			var(--c2) 66% 74%, var(--c1) 76% 84%, var(--c2) 86% 94%;
+		background: radial-gradient(
+				100% 100% at 100% 0,
+				var(--c1) 4%,
+				var(--_g),
+				#0008 96%,
+				#0000
+			),
+			radial-gradient(
+					100% 100% at 0 100%,
+					#0000,
+					#0008 4%,
+					var(--_g),
+					var(--c1) 96%
+				)
+				var(--c1);
+		background-size: var(--s) var(--s);
+	}
 }

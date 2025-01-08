@@ -17,7 +17,8 @@
 
 <PlayerTable {phase} {table} />
 
-<Hand {current} cards={hand} {selected} clickcard={clickCard} />
+<Hand {current} cards={hand} {selected} clickcard={clickCard} isYou />
+
 {#if phase === 2}
 	<button
 		onclick={pickUp}
@@ -27,6 +28,7 @@
 		Ta upp
 	</button>
 {/if}
+
 {#if phase === 1}
 	<Vault count={vault.length} />
 {/if}
