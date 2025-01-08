@@ -1,4 +1,6 @@
 <script>
+	import PlayerStatus from "./PlayerStatus.svelte";
+
 	let { player, started, changename, readychange, countdown } = $props();
 
 	let edit = $state(false);
@@ -49,11 +51,7 @@
 		{/if}
 
 		{#if player.ready}
-			<span
-				class="bg-emerald-700 rounded-full flex items-center justify-center w-8 h-8 text-3xl z-10 text-white"
-			>
-				<iconify-icon icon="lineicons:check"></iconify-icon>
-			</span>
+			<PlayerStatus ready={player.ready} />
 		{:else}
 			<button
 				class="bg-emerald-700 cursor-pointer font-semibold rounded-md text-white px-2 py-0.5 text-sm hover:bg-emerald-800"

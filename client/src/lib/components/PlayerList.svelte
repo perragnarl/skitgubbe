@@ -1,5 +1,6 @@
 <script>
-	import Window from "./Window.svelte";
+	import PlayerStatus from "./PlayerStatus.svelte";
+import Window from "./Window.svelte";
 
 	let {
 		playerList = $bindable(),
@@ -24,15 +25,7 @@
 				class="flex justify-between items-center border-b border-primary-200 py-2"
 			>
 				<p>{player.name}</p>
-				<p class="text-3xl leading-0">
-					{#if player.ready}
-						<iconify-icon icon="lineicons:check-circle-1"
-						></iconify-icon>
-					{:else}
-						<iconify-icon icon="lineicons:xmark-circle"
-						></iconify-icon>
-					{/if}
-				</p>
+				<PlayerStatus ready={player.ready} />
 			</li>
 		{/each}
 	</ul>
