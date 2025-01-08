@@ -1,7 +1,7 @@
 <script>
 	import PlayerStatus from "./PlayerStatus.svelte";
 
-	let { player, started, changename, readychange, countdown } = $props();
+	let { player, started, changename, setready, countdown } = $props();
 
 	let edit = $state(false);
 	let input = $state(null);
@@ -20,8 +20,8 @@
 		}
 	}
 
-	function handleReady(ready) {
-		readychange(ready);
+	function setReady(ready) {
+		setready(ready);
 	}
 </script>
 
@@ -55,7 +55,7 @@
 		{:else}
 			<button
 				class="bg-emerald-700 cursor-pointer font-semibold rounded-md text-white px-2 py-0.5 text-sm hover:bg-emerald-800"
-				onclick={handleReady}
+				onclick={() => setReady(true)}
 			>
 				Jag är redo
 			</button>

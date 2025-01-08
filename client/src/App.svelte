@@ -5,6 +5,7 @@
 
 	const hostname = window.location.hostname;
 	const port = import.meta.env.PROD ? window.location.port : 1337;
+	console.log(`http://${hostname}:${port}`);
 	$socket = io(`http://${hostname}:${port}`);
 
 	import Chat from "./lib/components/Chat.svelte";
@@ -96,7 +97,7 @@
 		$socket.emit("change-name", name);
 	}
 
-	function readyChange(ready) {
+	function setReady(ready) {
 		$socket.emit("ready-change", ready);
 	}
 
@@ -179,7 +180,7 @@
 
 	<Player
 		changename={changeName}
-		readychange={readyChange}
+		setready={setReady}
 		{countdown}
 		{started}
 		{player}
