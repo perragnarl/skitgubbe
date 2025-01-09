@@ -29,6 +29,6 @@
 	</button>
 {/if}
 
-{#if phase === 1}
-	<Vault count={vault.length} />
+{#if phase === 1 && vault.length > 0}
+	<Vault count={vault.length} isYou />
 {/if}

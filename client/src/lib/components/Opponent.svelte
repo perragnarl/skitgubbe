@@ -16,14 +16,14 @@
 			</p>
 		</div>
 	</div>
-	
+
 	<div class="rotate-180">
 		<Hand {current} cards={hand} />
 	</div>
 
 	<PlayerTable {phase} {table} />
 
-	<!-- {#if phase === 1}
+	{#if phase === 1 && vault.length > 0}
 		<Vault count={vault.length} />
-	{/if} -->
+	{/if}
 </div>
