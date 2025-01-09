@@ -3,10 +3,11 @@
 	import { socket } from "./lib/stores/socket";
 	import { windowStatus } from "./lib/stores/windows";
 
+	const protocol = window.location.protocol;
 	const hostname = window.location.hostname;
 	const port = import.meta.env.PROD ? window.location.port : 1337;
-	console.log(`http://${hostname}:${port}`);
-	$socket = io(`http://${hostname}:${port}`);
+	
+	$socket = io(`${protocol}//${hostname}:${port}`);
 
 	import Chat from "./lib/components/Chat.svelte";
 	import Log from "./lib/components/Log.svelte";
