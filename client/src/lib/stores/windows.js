@@ -4,4 +4,5 @@ export let windowStatus = writable({
 	log: true,
 	chat: false,
 	playerList: true,
+	scoreBoard: false
 });

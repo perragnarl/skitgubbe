@@ -1,8 +1,8 @@
 <script>
-	let { openwindow } = $props();
+	import { windowStatus } from "../stores/windows";
 
 	function openWindow(key) {
-		openwindow(key);
+		windowStatus.update((status) => ({ ...status, [key]: true }));
 	}
 </script>
 
@@ -21,4 +21,5 @@
 	{@render button("Chatt", "chat")}
 	{@render button("Logg", "log")}
 	{@render button("Spelare", "playerList")}
+	{@render button("Resultat", "scoreBoard")}
 </div>

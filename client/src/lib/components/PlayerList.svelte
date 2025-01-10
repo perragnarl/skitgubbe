@@ -1,20 +1,16 @@
 <script>
+	import { socket } from "../stores/socket";
 	import PlayerStatus from "./PlayerStatus.svelte";
-import Window from "./Window.svelte";
+	import Window from "./Window.svelte";
 
-	let {
-		playerList = $bindable(),
-		started,
-		disconnectall,
-		resetgame,
-	} = $props();
+	let { playerList = $bindable() } = $props();
 
 	function disconnectAll() {
-		disconnectall();
+		$socket.emit("disconnect-all");
 	}
 
 	function resetGame() {
-		resetgame();
+		$socket.emit("reset-game");
 	}
 </script>
 
@@ -32,12 +28,10 @@ import Window from "./Window.svelte";
 	<div class="flex flex-col gap-2">
 		<button
 			class="border px-2 py-0.5 rounded border-dashed block disabled:opacity-50 cursor-pointer"
-			disabled={started}
 			onclick={disconnectAll}>Disconnect all</button
 		>
 		<button
 			class="border px-2 py-0.5 rounded border-dashed block disabled:opacity-50 cursor-pointer"
-			disabled={started}
 			onclick={resetGame}>Reset game</button
 		>
 	</div>

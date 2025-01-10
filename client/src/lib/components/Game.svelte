@@ -1,33 +1,23 @@
 <script>
-	import { suits } from "../utils/suits";
+	import toast from "svelte-5-french-toast";
+	import { socket } from "../stores/socket";
 	import Deck from "./Deck.svelte";
 	import Opponent from "./Opponent.svelte";
 	import Yourself from "./Yourself.svelte";
+	import TrumpIndicator from "./TrumpIndicator.svelte";
 
-	let {
-		phase,
-		player,
-		playerList,
-		deckCount,
-		trumpSuit,
-		clickcard,
-		pickup,
-		playfromdeck,
-	} = $props();
+	let { player, playerList, started, phase } = $props();
 
-	function pickUp() {
-		pickup();
-	}
+	let trumpSuit = $state("");
+	let deckCount = $state(0);
 
-	function clickCard(card, current, isSelected) {
-		clickcard(card, current, isSelected);
-	}
+	$socket.on("update-deck", (newDeckCount) => {
+		deckCount = newDeckCount;
+	});
 
-	function playFromDeck() {
-		if (player.current) {
-			playfromdeck();
-		}
-	}
+	$socket.on("trump-suit", (suit) => {
+		trumpSuit = suit;
+	});
 </script>
 
 <div class="flex flex-col justify-between gap-2 h-full">
@@ -46,31 +36,25 @@
 	{/each}
 
 	{#if deckCount > 0 && phase === 1}
-		<Deck count={deckCount} onclick={playFromDeck} />
+		<Deck count={deckCount} />
 	{/if}
 
-	{#each playerList as { table, hand, vault, current, id, selected }}
+	{#if phase === 2}
+		<TrumpIndicator {trumpSuit} />
+	{/if}
+
+	{#each playerList as { table, hand, vault, current, id }}
 		{#if id === player.id}
 			<Yourself
+				{player}
 				{table}
 				{hand}
 				{vault}
 				{current}
-				{selected}
 				{phase}
-				clickcard={clickCard}
-				pickup={pickUp}
+				{started}
+				{playerList}
 			/>
 		{/if}
 	{/each}
 </div>
-
-{#if trumpSuit !== ""}
-	<div>
-		Trumf:
-		<span style="color: {suits[trumpSuit].color};">
-			{suits[trumpSuit].symbol}
-		</span>
-		{suits[trumpSuit].label}
-	</div>
-{/if}

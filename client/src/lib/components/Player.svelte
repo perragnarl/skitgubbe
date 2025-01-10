@@ -1,14 +1,21 @@
 <script>
+	import { socket } from "../stores/socket";
 	import PlayerStatus from "./PlayerStatus.svelte";
 
-	let { player, started, changename, setready, countdown } = $props();
+	let { player, playerList, started } = $props();
 
 	let input = $state(null);
 	let hasChangedName = $state(false);
 	let inputValue = $state("");
+	let current = $state(false);
+
+	$effect(() => {
+		let currentPlayer = playerList.find((p) => player.id === p.id);
+		current = currentPlayer.current;
+	});
 
 	function saveName() {
-		changename(inputValue);
+		$socket.emit("change-name", inputValue);
 		hasChangedName = true;
 	}
 
@@ -19,18 +26,15 @@
 	}
 
 	function setReady(ready) {
-		setready(ready);
+		$socket.emit("ready-change", ready);
 	}
 </script>
 
-<div class="flex flex-col self-center">
-	{#if countdown > 0}
-		<span class="text-center mb-4 text-xl text-white">
-			Spelet startar om: {countdown} sekunder
-		</span>
-	{/if}
+<div class="flex flex-col fixed bottom-8 left-1/2 -translate-x-1/2 gap-2">
 	<div
-		class="flex items-stretch gap-2 bg-primary-50 p-3 rounded-md shadow-md"
+		class:border-amber-300={current}
+		class:border-transparent={!current}
+		class="flex items-stretch gap-2 bg-primary-50 border-4 py-2 px-3 rounded-md shadow-md"
 	>
 		<iconify-icon icon="lineicons:user-4" class="text-3xl"></iconify-icon>
 		{#if !hasChangedName && !started}

@@ -17,7 +17,7 @@ if (isDocker) {
 function setupDevelopment() {
   io = new Server(1337, {
     cors: {
-      origin: ["http://localhost:5173"],
+      origin: ["http://localhost:1338"],
     },
     serveClient: false,
     transports: ["websocket", "polling"],
@@ -46,9 +46,9 @@ function setupProduction() {
   });
 }
 
-const cardsLeftInDeckBeforePhase2 = 34; // Testing purposes
+const cardsLeftInDeckBeforePhase2 = 46; // Testing purposes
 const maxPlayers = 4;
-const countdownTime = 2;
+const countdownTime = 5;
 const moveCardsFromTableToVaultDelay = 1.5;
 const colors = {
   1: "red",
@@ -91,7 +91,6 @@ io.on("connection", (socket) => {
     color: colors[players.length + 1],
     hand: [],
     table: [],
-    selected: [],
     vault: [],
     current: false,
     inBattle: false,
@@ -127,6 +126,8 @@ io.on("connection", (socket) => {
 
   // Reset the game
   socket.on("reset-game", () => {
+    console.log("Resetting game");
+    
     resetGame();
     updatePlayers();
     io.emit("reset-game");
@@ -205,6 +206,8 @@ io.on("connection", (socket) => {
 
   // Handle multiple card play (phase 2)
   socket.on("play-cards", (cards) => {
+    console.log("Playing cards", cards[0], cards[1], cards[2]);
+        
     // Check if the cards are valid
     const valid = checkCards(cards);
     if (valid) {
@@ -247,6 +250,8 @@ io.on("connection", (socket) => {
   });
 
   function checkCards(cards) {
+    // Log all cards
+    console.log("Checking cards: ", cards[0], cards[1], cards[2]);
     /*
      *  Check if the cards are valid
      *  - Same suit
@@ -259,6 +264,8 @@ io.on("connection", (socket) => {
 
     // Check that all the cards are of the same suit
     if (!cards.every((c) => c.suit === suit)) {
+      console.log(cards[0].suit);
+      
       console.log("Not the same suit");
       return false;
     }
@@ -439,6 +446,7 @@ io.on("connection", (socket) => {
       // Add the last player to the scoreboard
       scoreboard.push(players.find((p) => p.hand.length > 0));
       io.emit("game-over", scoreboard);
+      console.log("Game over", scoreboard);
     }
 
     // Add the cards to the player's table
@@ -584,11 +592,11 @@ io.on("connection", (socket) => {
     // Handle game start
     console.log("Game is starting");
 
-    // Notify all players that the game has started
-    io.emit("start-game");
-
     // Enter the first phase of the game
     gamePhase = 1;
+    
+    // Notify all players that the game has started
+    io.emit("start-game", gamePhase);
 
     // Create a deck of cards
     deck = [...deckTemplate];

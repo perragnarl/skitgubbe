@@ -1,45 +1,78 @@
 <script>
+	import { socket } from "../stores/socket";
 	import { cardRotation } from "../utils/cardRotation";
 	import Card from "./Card.svelte";
 
-	let {
-		current,
-		cards,
-		selected = null,
-		clickcard = null,
-		isYou = false,
-		phase,
-	} = $props();
+	let { current, cards, isYou = false, phase, player = null } = $props();
 
-	function clickCard(card, current, isSelected) {
-		clickcard(card, current, isSelected);
+	let selectedCards = $state([]);
+
+	$socket.on("invalid-cards", () => {
+		selectedCards = [];
+	});
+
+	function handleClick(card) {
+		const isSelected = selectedCards.includes(card);
+
+		if (phase === 1) {
+			$socket.emit("play-card", card);
+			return;
+		}
+
+		if (isSelected) {
+			$socket.emit("play-cards", selectedCards);
+			selectedCards = [];
+		} else {
+			selectedCards = [...selectedCards, card];
+		}
+	}
+
+	function deselect(card) {
+		selectedCards = selectedCards.filter((c) => c !== card);
+	}
+
+	function pickUp() {
+		$socket.emit("pick-up", player);
 	}
 </script>
 
-<div class="flex justify-center p-2 gap-3 rounded">
-	<div
-		class="flex border-2 {current
-			? 'border-amber-300'
-			: 'border-transparent'} rounded-lg p-4"
-	>
+<div class="flex flex-col justify-center items-center p-2 gap-3 rounded">
+	<div class="flex rounded-2xl gap-1">
 		{#each cards as card, i}
+			{@const selected = selectedCards.includes(card)}
 			{#if isYou}
-				{@const isSelected = selected.some(
-					(c) => c.suit === card.suit && c.label === card.label,
-				)}
-				<div style={phase === 1 ? `transform: ${cardRotation(i, cards.length)}` : ""}>
+				<div
+					style={phase === 1
+						? `transform: ${cardRotation(i, cards.length)}`
+						: ""}
+				>
 					<Card
 						suit={card.suit}
-						label={card.label}
 						{selected}
-						onclick={() => clickCard(card, current, isSelected)}
+						label={card.label}
+						onclick={() => handleClick(card)}
+						deselect={() => deselect(card)}
 					/>
 				</div>
 			{:else}
-				<div style={phase === 1 ? `transform: ${cardRotation(i, cards.length)}` : ""}>
+				<div
+					style={phase === 1
+						? `transform: ${cardRotation(i, cards.length)}`
+						: ""}
+				>
 					<Card suit={card.suit} label={card.label} hidden />
 				</div>
 			{/if}
 		{/each}
+
 	</div>
+	{#if isYou && phase === 2}
+			<button
+				onclick={pickUp}
+				disabled={current}
+				class="bg-red-700 cursor-pointer hover:bg-red-800 text-white font-semibold px-3 py-2 text-sm self-center rounded-md"
+			>
+				Ta upp
+			</button>
+	{/if}
 </div>
