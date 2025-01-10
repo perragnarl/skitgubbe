@@ -69,6 +69,7 @@ let battleStack = [];
 let trumpSuit = "";
 let countdownInterval;
 let scoreboard = [];
+let positions = ["top", "right", "bottom", "left"];
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
@@ -97,6 +98,7 @@ io.on("connection", (socket) => {
     current: false,
     inBattle: false,
     battleHand: [],
+    position: positions[players.length],
   };
 
   // Add the player to the list of players
@@ -104,7 +106,7 @@ io.on("connection", (socket) => {
 
   console.log("Players", players);
 
-  socket.emit("connection", player, players, isStarted);
+  socket.emit("connection", player.id, players, isStarted);
 
   // Notify other players that a new player has joined
   socket.broadcast.emit("new-player", player);

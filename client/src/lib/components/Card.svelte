@@ -23,7 +23,7 @@
 		class:border-transparent={!selected}
 		class:deck-bg={hidden}
 		class:bg-white={!hidden}
-		class="inline-flex border-4 rounded-lg p-2 h-32 w-22 cursor-pointer hover:bg-primary-50 text-primary-800 shadow-lg"
+		class="inline-flex border-4 rounded-lg p-2 h-26 w-18 cursor-pointer hover:bg-primary-50 text-primary-800 shadow-lg"
 		{onclick}
 	>
 		{#if hidden || count > 1}
@@ -35,8 +35,8 @@
 			{/if}
 		{:else}
 			<div class="absolute flex flex-col items-center top-4 left-4">
-				<span class="text-2xl">{label}</span>
-				<span class="text-3xl" style="color: {suits[suit].color}">
+				<span class="text-xl">{label}</span>
+				<span class="text-2xl" style="color: {suits[suit].color}">
 					{suits[suit].symbol}
 				</span>
 			</div>

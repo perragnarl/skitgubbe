@@ -7,14 +7,16 @@
 	let { name, table, hand, vault, current, phase, position } = $props();
 </script>
 
-<OpponentBadge {current} {name} />
+<div class="flex flex-col items-center">
+	<OpponentBadge {current} {name} />
 
-<div class="rotate-180">
-	<Hand {current} cards={hand} {phase} />
+	<div class="rotate-180">
+		<Hand {current} cards={hand} {phase} />
+	</div>
+
+	<PlayerTable {phase} {table} />
+
+	{#if phase === 1 && vault.length > 0}
+		<Vault count={vault.length} />
+	{/if}
 </div>
-
-<PlayerTable {phase} {table} />
-
-{#if phase === 1 && vault.length > 0}
-	<Vault count={vault.length} />
-{/if}

@@ -33,7 +33,7 @@
 
 	function pickUp() {
 		console.log("pick-up", player);
-		
+
 		$socket.emit("pick-up", player);
 	}
 </script>
@@ -43,11 +43,7 @@
 		{#each cards as card, i}
 			{@const selected = selectedCards.includes(card)}
 			{#if isYou}
-				<div
-					style={phase === 1
-						? `transform: ${cardRotation(i, cards.length)}`
-						: ""}
-				>
+				<div>
 					<Card
 						suit={card.suit}
 						{selected}
@@ -57,11 +53,7 @@
 					/>
 				</div>
 			{:else}
-				<div
-					style={phase === 1
-						? `transform: ${cardRotation(i, cards.length)}`
-						: ""}
-				>
+				<div>
 					<Card suit={card.suit} label={card.label} hidden />
 				</div>
 			{/if}

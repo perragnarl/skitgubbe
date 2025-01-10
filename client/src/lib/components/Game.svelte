@@ -3,10 +3,10 @@
 	import { socket } from "../stores/socket";
 	import Deck from "./Deck.svelte";
 	import Opponent from "./Opponent.svelte";
-	import Yourself from "./Yourself.svelte";
+	import Player from "./Player.svelte";
 	import TrumpIndicator from "./TrumpIndicator.svelte";
 
-	let { player, playerList, started, phase } = $props();
+	let { playerId, playerList,  phase, started } = $props();
 
 	let trumpSuit = $state("");
 	let deckCount = $state(0);
@@ -20,9 +20,15 @@
 	});
 </script>
 
-<div class="flex flex-col justify-between gap-2 h-full">
-	{#each playerList as { name, table, hand, vault, current, id }}
-		{#if id !== player.id}
+<div
+	class="h-full w-full"
+>
+	{#each playerList as player}
+		<Player {playerId} {player} {phase} {playerList} {started} />
+	{/each}
+	<!-- <div>empty 1</div>
+	{#each playerList as { name, table, hand, vault, current, id, position }}
+		{#if id !== player.id && position === "top"}
 			<Opponent
 				{name}
 				{table}
@@ -30,18 +36,56 @@
 				{vault}
 				{current}
 				{phase}
-				position="top"
+				{position}
 			/>
 		{/if}
 	{/each}
 
-	{#if deckCount > 0 && phase === 1}
-		<Deck count={deckCount} />
-	{/if}
+	<div>empty 3</div>
 
-	{#if phase === 2}
-		<TrumpIndicator {trumpSuit} />
-	{/if}
+	{#each playerList as { name, table, hand, vault, current, id, position }}
+		{#if id !== player.id && position === "left"}
+			<Opponent
+				{name}
+				{table}
+				{hand}
+				{vault}
+				{current}
+				{phase}
+				{position}
+			/>
+		{:else}
+			<div></div>
+		{/if}
+	{/each}
+
+	<div>
+		{#if deckCount > 0 && phase === 1}
+			<Deck count={deckCount} />
+		{/if}
+
+		{#if phase === 2}
+			<TrumpIndicator {trumpSuit} />
+		{/if}
+	</div>
+
+	{#each playerList as { name, table, hand, vault, current, id, position }}
+		{#if id !== player.id && position === "right"}
+			<Opponent
+				{name}
+				{table}
+				{hand}
+				{vault}
+				{current}
+				{phase}
+				{position}
+			/>
+		{:else}
+			<div></div>
+		{/if}
+	{/each}
+
+	<div></div>
 
 	{#each playerList as { table, hand, vault, current, id }}
 		{#if id === player.id}
@@ -57,4 +101,5 @@
 			/>
 		{/if}
 	{/each}
+	<div>empty 9</div> -->
 </div>

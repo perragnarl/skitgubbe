@@ -20,17 +20,7 @@
 
 	let phase = $state(0);
 	let onGoing = $state(false);
-	let player = $state({
-		id: "",
-		name: "",
-		color: "",
-		ready: false,
-		hand: [],
-		vault: [],
-		selected: [],
-		table: [],
-		current: false,
-	});
+	let playerId = $state("");
 	let playerList = $state([]);
 	let countdown = $state(-1);
 	let started = $state(false);
@@ -44,18 +34,10 @@
 		phase = newPhase;
 	});
 
-	$socket.on("current-player", (playerInfo) => {
-		player = { ...playerInfo };
-	});
-
-	$socket.on("update-player", (playerInfo) => {
-		player = { ...playerInfo };
-	});
-
-	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
+	$socket.on("connection", (currentPlayerId, activePlayerList, isStarted) => {
 		console.log("Connected to server");
 
-		player = { ...playerInfo };
+		playerId = currentPlayerId;
 		playerList = activePlayerList;
 		onGoing = isStarted;
 	});
@@ -86,7 +68,7 @@
 </script>
 
 <main
-	class="container mx-auto p-4 relative flex flex-col justify-between h-screen select-none"
+	class="p-4 relative flex flex-col justify-between h-screen select-none"
 >
 	<Toaster position="bottom-left" />
 
@@ -99,7 +81,7 @@
 
 	<Status {onGoing} {phase} />
 
-	<Game {player} {playerList} {started} {phase} />
+	<Game {playerId} {playerList} {started} {phase} />
 
 	<Countdown />
 </main>
