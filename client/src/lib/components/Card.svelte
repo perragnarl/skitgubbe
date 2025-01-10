@@ -16,14 +16,14 @@
 	}
 </script>
 
-<div class="relative">
+<div class="relative rounded-lg border border-gray-950/15">
 	<button
 		type="button"
 		class:border-amber-300={selected}
 		class:border-transparent={!selected}
 		class:deck-bg={hidden}
 		class:bg-white={!hidden}
-		class="inline-flex border-4 rounded-lg p-2 h-32 w-22 cursor-pointer hover:bg-primary-50 text-primary-800 shadow-md"
+		class="inline-flex border-4 rounded-lg p-2 h-32 w-22 cursor-pointer hover:bg-primary-50 text-primary-800 shadow-lg"
 		{onclick}
 	>
 		{#if hidden || count > 1}

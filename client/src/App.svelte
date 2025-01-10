@@ -61,7 +61,9 @@
 	});
 
 	$socket.on("update-players", (newList) => {
+		
 		playerList = newList;
+		console.log("update-players", playerList);
 	});
 
 	$socket.on("countdown-aborted", () => {
@@ -76,6 +78,10 @@
 
 	$socket.on("invalid-cards", () => {
 		toast.error("Ogiltiga kort eller kombination");
+	});
+
+	$socket.on("no-pick-up", () => {
+		toast.error("Det går inte att plocka upp");
 	});
 </script>
 

@@ -46,7 +46,9 @@ function setupProduction() {
   });
 }
 
-const cardsLeftInDeckBeforePhase2 = 46; // Testing purposes
+const testPhase2 = false; // Test phase 2
+
+const cardsLeftInDeckBeforePhase2 = 1;
 const maxPlayers = 4;
 const countdownTime = 5;
 const moveCardsFromTableToVaultDelay = 1.5;
@@ -127,7 +129,7 @@ io.on("connection", (socket) => {
   // Reset the game
   socket.on("reset-game", () => {
     console.log("Resetting game");
-    
+
     resetGame();
     updatePlayers();
     io.emit("reset-game");
@@ -188,30 +190,28 @@ io.on("connection", (socket) => {
   });
 
   // Handle deck play (chansa)
-  socket.on("play-from-deck", () => {
+  socket.on("play-from-deck", async () => {
     const card = deck.shift();
-    playCards({ cards: [card], fromDeck: true });
+    await playCards({ cards: [card], fromDeck: true });
 
     // Update the players
     updatePlayers();
   });
 
   // Handle single card play (phase 1)
-  socket.on("play-card", (card) => {
-    playCards({ cards: [card] });
+  socket.on("play-card", async (card) => {
+    await playCards({ cards: [card] });
 
     // Update the players
     updatePlayers();
   });
 
   // Handle multiple card play (phase 2)
-  socket.on("play-cards", (cards) => {
-    console.log("Playing cards", cards[0], cards[1], cards[2]);
-        
+  socket.on("play-cards", async (cards) => {
     // Check if the cards are valid
     const valid = checkCards(cards);
     if (valid) {
-      playCards({ cards });
+      await playCards({ cards });
     } else {
       socket.emit("invalid-cards");
     }
@@ -221,13 +221,22 @@ io.on("connection", (socket) => {
   });
 
   socket.on("pick-up", (player) => {
+    console.log("Picking up cards", player);
+
     let lowestCardArray = null;
     let playerWithLowestCardArray = null;
 
     // Find the lowest card array on all the players' tables
     players.forEach((p) => {
+      console.log("Checking player: ", p.id);
+
       p.table.forEach((cardArray) => {
+        console.log("Checking card array: ", cardArray);
+
         if (!lowestCardArray || cardArray[0].value < lowestCardArray[0].value) {
+          console.log("Found lowest card array", cardArray);
+          console.log("Player with lowest card array", p.name);
+
           lowestCardArray = cardArray;
           playerWithLowestCardArray = p;
         }
@@ -242,7 +251,12 @@ io.on("connection", (socket) => {
       }
 
       // Add the lowest card array to the current player's hand
-      player.hand.push(...lowestCardArray);
+      players.find((p) => p.id === player.id).hand.push(...lowestCardArray);
+
+      // Set next player
+      setNextPlayer();
+    } else {
+      socket.emit("no-pick-up");
     }
 
     // Update the players
@@ -250,8 +264,6 @@ io.on("connection", (socket) => {
   });
 
   function checkCards(cards) {
-    // Log all cards
-    console.log("Checking cards: ", cards[0], cards[1], cards[2]);
     /*
      *  Check if the cards are valid
      *  - Same suit
@@ -264,8 +276,6 @@ io.on("connection", (socket) => {
 
     // Check that all the cards are of the same suit
     if (!cards.every((c) => c.suit === suit)) {
-      console.log(cards[0].suit);
-      
       console.log("Not the same suit");
       return false;
     }
@@ -344,9 +354,9 @@ io.on("connection", (socket) => {
     return true;
   }
 
-  function playCards({ cards, fromDeck = false }) {
+  async function playCards({ cards, fromDeck = false }) {
     if (gamePhase === 1) {
-      playPhase1Card(cards[0], fromDeck);
+      await playPhase1Card(cards[0], fromDeck);
 
       // Update the deck count
       updateDeckCount();
@@ -355,7 +365,7 @@ io.on("connection", (socket) => {
     }
   }
 
-  function playPhase1Card(card, fromDeck = false) {
+  async function playPhase1Card(card, fromDeck = false) {
     const isLastCardInDeck = deck.length === cardsLeftInDeckBeforePhase2;
     console.log(`${player.id} played ${card.value} of ${card.suit}`);
 
@@ -370,6 +380,9 @@ io.on("connection", (socket) => {
     player.table.push(card);
 
     console.log("Cards left: ", deck.length);
+
+    // Update the players
+    updatePlayers();
 
     // Give a new card to the player
     if (!fromDeck && !isLastCardInDeck) {
@@ -398,11 +411,16 @@ io.on("connection", (socket) => {
 
       // Check if there are multiple players with the highest card
       if (playersWithHighestCard.length > 1) {
+        // A slight delay before starting the battle round
+        await delay(2000);
         // If there are multiple players with the highest card, start a battle round
         initBattleRound(playersWithHighestCard);
       } else {
+        // A slight delay before announcing the winner
+        await delay(2000);
         // If there is only one player with the highest card, set them as the winner
         setRoundWinner(playersWithHighestCard[0]);
+        console.log("Round winner", playersWithHighestCard[0]);
       }
     } else {
       // Find the next player (next in array) and set them as current
@@ -594,7 +612,7 @@ io.on("connection", (socket) => {
 
     // Enter the first phase of the game
     gamePhase = 1;
-    
+
     // Notify all players that the game has started
     io.emit("start-game", gamePhase);
 
@@ -616,6 +634,12 @@ io.on("connection", (socket) => {
 
     updateDeckCount();
     updatePlayers();
+
+    // To test phase 2
+    if (testPhase2) {
+      console.log("Testing phase 2");
+      initTestPhase2();
+    }
   }
 
   function updateDeckCount() {
@@ -623,14 +647,37 @@ io.on("connection", (socket) => {
   }
 
   function updatePlayers() {
+    console.log("Updating players");
+
     // Get this player from the list of players
     let thisPlayer = players.find((p) => p.id === socket.id);
-    
+
     socket.emit("update-player", thisPlayer);
     io.emit("update-players", players);
   }
 
   function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function initTestPhase2() {
+    initPhase2();
+    players[0].hand = [
+      { value: 1, suit: "hearts", label: "1" },
+      { value: 2, suit: "hearts", label: "2" },
+      { value: 3, suit: "spades", label: "3" },
+    ];
+
+    players[1].hand = [
+      { value: 1, suit: "spades", label: "1" },
+      { value: 2, suit: "spades", label: "2" },
+      { value: 3, suit: "hearts", label: "3" },
+    ];
+
+    trumpSuit = "hearts";
+    deck = [];
+    io.emit("trump-suit", trumpSuit);
+    updateDeckCount();
+    updatePlayers();
   }
 });
