@@ -17,7 +17,7 @@
 
 <PlayerTable {phase} {table} />
 
-<Hand {current} cards={hand} {selected} clickcard={clickCard} isYou />
+<Hand {current} cards={hand} {selected} clickcard={clickCard} isYou {phase} />
 
 {#if phase === 2}
 	<button

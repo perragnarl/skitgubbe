@@ -38,7 +38,7 @@
 	}
 </script>
 
-<Window label="Chatt" key="chat">
+<Window label="Chatt" key="chat" left={1} top={56}>
 	<div
 		class="overflow-y-auto h-44 flex flex-col gap-1 mb-2"
 		bind:this={chatWindow}

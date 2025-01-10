@@ -18,7 +18,7 @@ import Window from "./Window.svelte";
 	}
 </script>
 
-<Window label="Spelare" key="playerList">
+<Window label="Spelare" key="playerList" left={1} top={36}>
 	<ul class="mb-2">
 		{#each playerList as player}
 			<li

@@ -18,7 +18,7 @@
 	</div>
 
 	<div class="rotate-180">
-		<Hand {current} cards={hand} />
+		<Hand {current} cards={hand} {phase} />
 	</div>
 
 	<PlayerTable {phase} {table} />

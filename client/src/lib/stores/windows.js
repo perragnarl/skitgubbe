@@ -2,6 +2,6 @@ import { writable } from "svelte/store";
 
 export let windowStatus = writable({
 	log: true,
-	chat: true,
+	chat: false,
 	playerList: true,
 });

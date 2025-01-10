@@ -6,7 +6,7 @@
 	const protocol = window.location.protocol;
 	const hostname = window.location.hostname;
 	const port = import.meta.env.PROD ? window.location.port : 1337;
-	
+
 	$socket = io(`${protocol}//${hostname}:${port}`);
 
 	import Chat from "./lib/components/Chat.svelte";
@@ -42,12 +42,12 @@
 		started ? (phase = 1) : null;
 	});
 
-	$inspect(player)
+	$inspect(player);
 
 	$socket.on("connection", (playerInfo, activePlayerList, isStarted) => {
 		console.log("Connected to server");
 
-		player = {...playerInfo};
+		player = { ...playerInfo };
 		playerList = activePlayerList;
 		onGoing = isStarted;
 	});
@@ -111,6 +111,8 @@
 	}
 
 	function clickCard(card, current, isSelected) {
+		console.log("clickCard", card, current, isSelected);
+
 		if (!current) return;
 
 		if (phase === 1) {
@@ -142,22 +144,19 @@
 <main
 	class="container mx-auto p-4 relative flex flex-col justify-between h-screen select-none"
 >
-	{#if $windowStatus.log}
-		<Log />
-	{/if}
-	{#if $windowStatus.chat}
-		<Chat />
-	{/if}
-	{#if $windowStatus.playerList}
-		<PlayerList
-			resetgame={resetGame}
-			disconnectall={disconnectAll}
-			bind:playerList
-			{started}
-		/>
-	{/if}
+	<Log />
+	<Chat />
+	<PlayerList
+		resetgame={resetGame}
+		disconnectall={disconnectAll}
+		bind:playerList
+		{started}
+	/>
+
 	<Controls openwindow={openWindow} />
+
 	<Status {onGoing} {phase} />
+	
 	{#if started}
 		<Game
 			{phase}

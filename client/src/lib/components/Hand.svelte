@@ -8,6 +8,7 @@
 		selected = null,
 		clickcard = null,
 		isYou = false,
+		phase,
 	} = $props();
 
 	function clickCard(card, current, isSelected) {
@@ -26,7 +27,7 @@
 				{@const isSelected = selected.some(
 					(c) => c.suit === card.suit && c.label === card.label,
 				)}
-				<div style="transform: {cardRotation(i, cards.length)}">
+				<div style={phase === 1 ? `transform: ${cardRotation(i, cards.length)}` : ""}>
 					<Card
 						suit={card.suit}
 						label={card.label}
@@ -35,7 +36,7 @@
 					/>
 				</div>
 			{:else}
-				<div style="transform: {cardRotation(i, cards.length)}">
+				<div style={phase === 1 ? `transform: ${cardRotation(i, cards.length)}` : ""}>
 					<Card suit={card.suit} label={card.label} hidden />
 				</div>
 			{/if}
