@@ -69,7 +69,7 @@ let battleStack = [];
 let trumpSuit = "";
 let countdownInterval;
 let scoreboard = [];
-let positions = ["top", "right", "bottom", "left"];
+let positions = ["top", "bottom", "right", "left"];
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
@@ -97,8 +97,8 @@ io.on("connection", (socket) => {
     vault: [],
     current: false,
     inBattle: false,
-    battleHand: [],
     position: positions[players.length],
+    roundOrder: -1,
   };
 
   // Add the player to the list of players
@@ -391,11 +391,12 @@ io.on("connection", (socket) => {
       player.hand.push(deck.shift());
     }
 
-    // Remove current player status
-    player.current = false;
-
     // Check if the player is last in the round
-    if (players.every((p) => p.table.length > 0)) {
+    let isLastPlayer = players.every((p) => p.table.length > 0);
+
+    // If so, round is over
+    // TODO: Have to know if its a battle round
+    if (isLastPlayer) {
       console.log("Round is over");
 
       // Find the highest card on the table of all players
@@ -411,15 +412,14 @@ io.on("connection", (socket) => {
         (p) => p.table[0].value === highest
       );
 
+      // A slight delay before announcing the winner
+      await delay(2000);
+
       // Check if there are multiple players with the highest card
       if (playersWithHighestCard.length > 1) {
-        // A slight delay before starting the battle round
-        await delay(2000);
         // If there are multiple players with the highest card, start a battle round
         initBattleRound(playersWithHighestCard);
       } else {
-        // A slight delay before announcing the winner
-        await delay(2000);
         // If there is only one player with the highest card, set them as the winner
         setRoundWinner(playersWithHighestCard[0]);
         console.log("Round winner", playersWithHighestCard[0]);
@@ -490,18 +490,31 @@ io.on("connection", (socket) => {
   }
 
   function setNextPlayer() {
-    let index = players.indexOf(player);
-    player.current = false;
-    if (index === players.length - 1) {
-      players[0].current = true;
-    } else {
-      players[index + 1].current = true;
+    let currentPlayer = players.find((player) => player.current);
+    currentPlayer.current = false;
+
+    // If it's a battle round, make sure the next player is in battle
+    if (battleRound) {
+      let nextPlayer = players.find(
+        (player) =>
+          player.roundOrder === (currentPlayer.roundOrder + 1) % players.length &&
+          player.inBattle
+      );
+      nextPlayer.current = true;
+      return;
     }
+
+    // Find the next player based on the round order
+    let nextPlayer = players.find(
+      (player) =>
+        player.roundOrder === (currentPlayer.roundOrder + 1) % players.length
+    );
+    nextPlayer.current = true;
   }
 
   function setRoundWinner(winner) {
     // Announce the winner
-    socket.emit("round-winner", winner);
+    io.emit("round-winner", winner);
 
     // Wait for a moment before moving the cards, TODO: Not working
     // await delay(moveCardsFromTableToVaultDelay * 1000);
@@ -524,21 +537,26 @@ io.on("connection", (socket) => {
     // Set the battle round flag
     battleRound = true;
     console.log("Starting battle round");
-    socket.emit("battle-round", playersWithHighestCard);
+    io.emit("battle-round", playersWithHighestCard);
 
     // Mark all players who played the highest card as in battle
     playersWithHighestCard.forEach((p) => (p.inBattle = true));
-
-    // Set the current player to the player who first played the highest card
-    let currentPlayer = playersWithHighestCard.find((p) => p.id === player.id);
-
+    
     // Move all cards to the battle stack
     players.forEach((p) => {
       battleStack.push(...p.table);
       p.table = [];
     });
 
-    currentPlayer.current = true;
+    // Find the current player and mark them as not current
+    let currentPlayer = players.find((player) => player.current);
+    currentPlayer.current = false;
+    
+    // Find the player who first played the highest card and set them as the current player
+    playersWithHighestCard[0].current = true;
+    console.log("Next player in battle: ", playersWithHighestCard[0]);
+
+    io.emit("update-battle-stack", battleStack);
   }
 
   function resetBattleRound(winner) {
@@ -550,6 +568,7 @@ io.on("connection", (socket) => {
     battleRound = false;
     // Mark all players as not in battle
     players.forEach((p) => (p.inBattle = false));
+    io.emit("update-battle-stack", battleStack);
   }
 
   function initPhase2() {
@@ -630,9 +649,26 @@ io.on("connection", (socket) => {
     });
 
     // Randomly select a player to start
-    let currentPlayer = players[Math.floor(Math.random() * players.length)];
-    console.log(`Starting with ${currentPlayer.id}`);
-    currentPlayer.current = true;
+    let startingPlayer = players[Math.floor(Math.random() * players.length)];
+    console.log(`Starting with ${startingPlayer.id}`);
+    startingPlayer.current = true;
+    startingPlayer.roundOrder = 0;
+
+    // Define the clockwise order of positions
+    const positionOrder = ["top", "right", "bottom", "left"];
+
+    // Set round order for the rest of the players in a clockwise order based on player.position
+    let currentPlayerPosition = startingPlayer.position;
+    players.forEach((player) => {
+      if (player.id !== startingPlayer.id) {
+        let currentIndex = positionOrder.indexOf(currentPlayerPosition);
+        let playerIndex = positionOrder.indexOf(player.position);
+        let roundOrder =
+          (playerIndex - currentIndex + positionOrder.length) %
+          positionOrder.length;
+        player.roundOrder = roundOrder;
+      }
+    });
 
     updateDeckCount();
     updatePlayers();
@@ -651,10 +687,6 @@ io.on("connection", (socket) => {
   function updatePlayers() {
     console.log("Updating players");
 
-    // Get this player from the list of players
-    let thisPlayer = players.find((p) => p.id === socket.id);
-
-    socket.emit("update-player", thisPlayer);
     io.emit("update-players", players);
   }
 

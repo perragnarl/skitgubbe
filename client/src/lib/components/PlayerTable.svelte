@@ -4,7 +4,7 @@
     let { phase, table } = $props();
 </script>
 
-<div class="flex justify-center gap-3 h-32">
+<div class="flex justify-center gap-3">
     {#if phase === 1}
         {#each table as { suit, label }}
             <Card {suit} {label} />
