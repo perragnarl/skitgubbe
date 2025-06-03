@@ -1,0 +1,37 @@
+name: Build & push skitgubbe
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**'
+      - 'server/**'
+      - '.gitea/workflows/skitgubbe.yml'
+      - 'Dockerfile'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone code
+        uses: actions/checkout@v2
+
+      - name: Determine tag
+        id: set-tag
+        run: |
+          BRANCH=$(echo "${GITHUB_REF##*/}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')
+          BRANCH=$(echo "$BRANCH" | sed 's/^-*//;s/-*$//')
+          echo "TAG=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Login to Docker registry
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login 192.168.1.50:5000 -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t 192.168.1.50:5000/pelagnal/skitgubbe:${{ steps.set-tag.outputs.TAG }} ./
+
+      - name: Push Docker image
+        run: |
+          docker push 192.168.1.50:5000/pelagnal/skitgubbe:${{ steps.set-tag.outputs.TAG }}
